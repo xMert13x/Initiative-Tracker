@@ -868,16 +868,7 @@ function nextTurn() {
   saveGame();
   renderCharacters();
 }
-
-
-document.addEventListener("keydown", (event) => {
-  // Ignore if typing in an input or file picker
-  const tag = document.activeElement.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA") return;
-    // Optional: N key → Next Turn
-  if (event.key.toLowerCase() === "n") {
-    nextTurn();
-  }
+ 
 });
 
 function addCharacter() {
@@ -1133,18 +1124,23 @@ function updateMuteButton() {
 updateMuteButton();
 
 // Keyboard shortcut: press "M" to toggle mute
-document.addEventListener("keydown", (event) => {
-  // Ignore typing in inputs
-  if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
+window.addEventListener("keydown", (event) => {
+  const tag = document.activeElement?.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
 
-  if (event.key.toLowerCase() === "m") {
-    toggleMute();
-  }
-   // F key → Toggle Fullscreen
-  if (event.key.toLowerCase() === "f") {
-    toggleFullscreen();
+  switch (event.key.toLowerCase()) {
+    case "n":
+      nextTurn();
+      break;
+    case "m":
+      toggleMute();
+      break;
+    case "f":
+      toggleFullscreen();
+      break;
   }
 });
+
 
 let cursorTimeout = null;
 const CURSOR_HIDE_DELAY = 1000; // 1 second
