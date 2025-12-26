@@ -4,6 +4,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Uncial Antiqua&display=swap" rel="stylesheet">
   <title>Roll For Initiative</title>
   <style>
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+
     body::before {
   content: "";
   position: fixed;
@@ -427,6 +435,7 @@ body.fullscreen .character-row {
 }
 
 
+
 .controls {
   display: flex;
   justify-content: center;   /* centers horizontally */
@@ -454,10 +463,10 @@ body.fullscreen .controls {
   justify-content: center;    /* center horizontally */
   gap: 15px;
   position: fixed;
-  bottom: 30px;               /* spacing from bottom */
+  bottom: 50px;               /* spacing from bottom */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2000;              /* ensure they stay above characters */
+  z-index: 1000;              /* ensure they stay above characters */
 }
 
 /* Fullscreen character row should stay centered, but below controls */
@@ -651,7 +660,8 @@ body.fullscreen .controls button#fullscreenBtn{
 
 
 </head>
-<body class="theme-default">
+<body tabindex="0" class="theme-default">
+
 
 <div class="theme-selector">
   <button id="themeToggle">Theme ▾</button>
@@ -1093,6 +1103,12 @@ document.addEventListener("fullscreenchange", () => {
   }
 });
 
+document.addEventListener("fullscreenchange", () => {
+  // Small delay allows browser to finish transition
+  setTimeout(() => {
+    document.body.focus();
+  }, 100);
+});
 
 // Load saved theme
 const savedTheme = localStorage.getItem("initiativeTheme") || "default";
