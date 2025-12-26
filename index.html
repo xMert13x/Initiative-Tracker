@@ -868,7 +868,16 @@ function nextTurn() {
   saveGame();
   renderCharacters();
 }
- 
+
+
+document.addEventListener("keydown", (event) => {
+  // Ignore if typing in an input or file picker
+  const tag = document.activeElement.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+    // Optional: N key → Next Turn
+  if (event.key.toLowerCase() === "n") {
+    nextTurn();
+  }
 });
 
 function addCharacter() {
@@ -1124,23 +1133,18 @@ function updateMuteButton() {
 updateMuteButton();
 
 // Keyboard shortcut: press "M" to toggle mute
-window.addEventListener("keydown", (event) => {
-  const tag = document.activeElement?.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA") return;
+document.addEventListener("keydown", (event) => {
+  // Ignore typing in inputs
+  if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
 
-  switch (event.key.toLowerCase()) {
-    case "n":
-      nextTurn();
-      break;
-    case "m":
-      toggleMute();
-      break;
-    case "f":
-      toggleFullscreen();
-      break;
+  if (event.key.toLowerCase() === "m") {
+    toggleMute();
+  }
+   // F key → Toggle Fullscreen
+  if (event.key.toLowerCase() === "f") {
+    toggleFullscreen();
   }
 });
-
 
 let cursorTimeout = null;
 const CURSOR_HIDE_DELAY = 1000; // 1 second
@@ -1166,10 +1170,7 @@ document.addEventListener("mousedown", resetCursorTimer);
 
 
 document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement) {
-    document.body.focus();
-  }
-});
+  const isFullscreen = !!document.fullscreenElement;
 
   // Toggle fullscreen class for CSS
   document.body.classList.toggle("fullscreen", isFullscreen);
