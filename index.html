@@ -1166,7 +1166,10 @@ document.addEventListener("mousedown", resetCursorTimer);
 
 
 document.addEventListener("fullscreenchange", () => {
-  const isFullscreen = !!document.fullscreenElement;
+  if (!document.fullscreenElement) {
+    document.body.focus();
+  }
+});
 
   // Toggle fullscreen class for CSS
   document.body.classList.toggle("fullscreen", isFullscreen);
