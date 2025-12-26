@@ -464,7 +464,7 @@ body.fullscreen .controls {
 
 /* Fullscreen character row should stay centered, but below controls */
 body.fullscreen .character-row {
-  min-height: calc(100vh - 5px); /* leave space for controls */
+  min-height: calc(100vh - 0px); /* leave space for controls */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -653,7 +653,7 @@ body.fullscreen .controls button#fullscreenBtn{
 
 
 </head>
-<body class="theme-default">
+<body class="theme-default" tabindex="0">
 
 <div class="theme-selector">
   <button id="themeToggle">Theme ▾</button>
@@ -1086,15 +1086,6 @@ function toggleFullscreen() {
   }
 }
 
-// Add/remove fullscreen class to body
-document.addEventListener("fullscreenchange", () => {
-  if (document.fullscreenElement) {
-    document.body.classList.add("fullscreen");
-  } else {
-    document.body.classList.remove("fullscreen");
-  }
-});
-
 
 // Load saved theme
 const savedTheme = localStorage.getItem("initiativeTheme") || "default";
@@ -1102,7 +1093,6 @@ document.body.className = `theme-${savedTheme}`;
 
 
 window.addEventListener("resize", renderCharacters);
-document.addEventListener("fullscreenchange", renderCharacters);
 
 function playTurnSound() {
   const sound = document.getElementById("turnSound");
@@ -1179,15 +1169,28 @@ document.addEventListener("mousemove", resetCursorTimer);
 document.addEventListener("mousedown", resetCursorTimer);
 
 
-// Reset when entering or exiting fullscreen
 document.addEventListener("fullscreenchange", () => {
-  if (document.fullscreenElement) {
+  const isFullscreen = !!document.fullscreenElement;
+
+  // Toggle fullscreen class for CSS
+  document.body.classList.toggle("fullscreen", isFullscreen);
+
+  // Recalculate character layout
+  renderCharacters();
+
+  if (isFullscreen) {
+    // Start cursor hide timer
     resetCursorTimer();
   } else {
+    // Restore cursor and keyboard control
     document.body.classList.remove("cursor-hidden");
     if (cursorTimeout) clearTimeout(cursorTimeout);
+
+    // Restore keyboard focus so shortcuts work immediately
+    document.body.focus();
   }
 });
+
 
 
 </script>
