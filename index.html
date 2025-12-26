@@ -8,7 +8,7 @@
     body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;.
+  top: 0; left: 0;
   width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.2); /* dark overlay */
   z-index: -1;
@@ -456,7 +456,7 @@ body.fullscreen .controls {
   justify-content: center;    /* center horizontally */
   gap: 15px;
   position: fixed;
-  bottom: 92px;               /* spacing from bottom */
+  bottom: 68px;               /* spacing from bottom */
   left: 50%;
   transform: translateX(-50%);
   z-index: 2000;              /* ensure they stay above characters */
@@ -464,7 +464,7 @@ body.fullscreen .controls {
 
 /* Fullscreen character row should stay centered, but below controls */
 body.fullscreen .character-row {
-  min-height: calc(100vh - 100px); /* leave space for controls */
+  min-height: calc(100vh - 0px); /* leave space for controls */
   display: flex;
   justify-content: center;
   align-items: center;
