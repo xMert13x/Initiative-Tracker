@@ -9,7 +9,7 @@
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.8); /* dark overlay */
+  background-color: rgba(0, 0, 0, 0.2); /* dark overlay */
   z-index: -1;
 }
 
@@ -22,6 +22,41 @@
   padding: 0;
   font-family: Arial, sans-serif; /* fallback font for content */
 }
+
+/* === BACKGROUND THEMES === */
+
+body.theme-default {
+  background-image: url('images/background.png');
+}
+
+body.theme-dungeon {
+  background-image: url('images/dungeon.jpeg');
+}
+
+body.theme-forest {
+  background-image: url('images/forest.jpeg');
+}
+
+body.theme-arcane {
+  background-image: url('images/arcane.jpeg');
+}
+
+body.theme-spooky {
+  background-image: url('images/spooky.jpeg');
+}
+body.theme-hellfire {
+  background-image: url('images/hellfire.jpeg');
+}
+
+body.theme-icy {
+  background-image: url('images/icy.jpeg');
+}
+
+body.theme-townsquare {
+  background-image: url('images/townsquare.jpeg');
+}
+
+
     h1 {
   font-family: 'Uncial Antiqua', cursive;
   font-size: 100px; /* you can adjust */
@@ -30,14 +65,91 @@
   text-shadow: 2px 2px 4px white; /* adds depth */
   margin-bottom: 20px;
 }
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 10; /* stays above background and characters */
+}
+
+.theme-toggle button {
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #444;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle button:hover {
+  background-color: #666;
+}
+
+.theme-selector {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1000;
+}
+
+#themeToggle {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  background-color: #222;
+  color: white;
+  border: 1px solid #555;
+  cursor: pointer;
+}
+
+#themeToggle:hover {
+  background-color: #444;
+}
+
+.theme-menu {
+  display: none;
+  margin-top: 0px;
+  background-color: rgba(0, 0, 0, 0.243);
+  border: 1px solid #555;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.theme-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.theme-menu button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+
 .character-row {
   display: flex;
   justify-content: center;
   align-items: stretch;       /* characters fill full row height */
   gap: 0px;
   padding: 0 20px;           /* gap between edges and characters */
-  overflow: hidden;
+  padding-top: 8px;
+  overflow-x: visible;
+  overflow-y: visible;
 }
+
+.character-row {
+  margin-bottom: 45px; /* space for delete tabs */
+}
+
 
 .character-row .character {
   flex: 1 1 0;               /* grow/shrink evenly */
@@ -64,12 +176,41 @@
     text-align: center;
       padding: 5px;
   border: 1px solid black;
-  background-color: rgba(255, 255, 255, 0.642);
+  background-color: rgba(255, 255, 255, 0.223);
 }
-   body.fullscreen .controls,
-    body.fullscreen .add-character {
-      display: none;
-    }
+
+/* Center character row in fullscreen */
+body.fullscreen .character-row {
+  display: flex;
+  justify-content: center;    /* horizontal centering */
+  align-items: center;        /* vertical centering */
+  min-height: 100vh;          /* full viewport height */
+  margin-bottom: 0;           /* remove extra margin */
+}
+
+
+.character {
+  filter: brightness(0.75) saturate(0.8);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.character:not(.active) {
+  filter: brightness(0.75) saturate(0.8) blur(0.5px);
+}
+
+
+.character p {
+  margin: 6px 0 4px;
+  font-family: 'Uncial Antiqua', cursive;
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #111;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+   font-size: clamp(14px, 2vw, 30px);
+  line-height: 2.0;
+}
+
 .character img {
   width: 120px;  /* bigger than before */
   height: 300px; /* keep square */
@@ -82,8 +223,47 @@
 
 
 .character.active {
-  background-color: gold;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.35),
+    rgba(255, 255, 255, 0.6)
+  );
+  border-color: gold;
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.8),
+    0 0 25px rgba(255, 215, 0, 0.6),
+    0 0 45px rgba(255, 215, 0, 0.4);
+  animation: heroicGlow 1.8s ease-in-out infinite;
 }
+
+.character.active {
+  filter: brightness(1.1) saturate(1.2);
+  transform: translateY(-4px);
+}
+
+
+@keyframes heroicGlow {
+  0% {
+    box-shadow:
+      0 0 12px rgba(255, 215, 0, 0.6),
+      0 0 25px rgba(255, 215, 0, 0.4),
+      0 0 45px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(255, 215, 0, 0.9),
+      0 0 35px rgba(255, 215, 0, 0.7),
+      0 0 65px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    box-shadow:
+      0 0 12px rgba(255, 215, 0, 0.6),
+      0 0 25px rgba(255, 215, 0, 0.4),
+      0 0 45px rgba(255, 215, 0, 0.2);
+  }
+}
+
+
 .character {
   cursor: grab;
 }
@@ -125,26 +305,133 @@
   background-color: #666;
 }
 
+.character {
+  position: relative;
+}
+
+.character {
+  touch-action: none;
+}
+
+.character {
+  position: relative;                 /* for absolute-positioned elements like delete */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+  max-width: 260px;
+   max-height: 460px;
+
+  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(220,220,220,0.6));
+  border: 3px solid #444;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.character:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+
+
 .delete-btn {
-  background-color: darkred;
-  color: white;
-  border: none;
+  position: absolute;
+  bottom: 0px;
+
+}
+
+
+.delete-btn {
+  margin-top: 0px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
+  border: 2px solid #500;
+  background: radial-gradient(circle at top left, #a00, #500);
+  color: #fff;
+  font-size: 14px;
   font-weight: bold;
-  margin-top: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .delete-btn:hover {
-  background-color: red;
+  background: radial-gradient(circle at top left, #f00, #800);
+  transform: scale(1.1);
 }
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+.character {
+  position: relative; /* required for absolute positioning */
+  padding-bottom: 0px; /* creates space for the hanging tab */
+}
+
+.delete-tab {
+  position: absolute;
+  bottom: -44px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  width: 52px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease 0.25s, transform 0.25s ease 0.25s;
+}
+
+.character:hover .delete-tab {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+.delete-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: radial-gradient(circle at top, #aa0000, #550000);
+  color: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-size: 35px;
+  line-height: 1;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background: radial-gradient(circle at top, #ff3333, #880000);
+  transform: scale(1.1);
+}
+
+.character::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 10px;
+}
+
+
 .controls {
   display: flex;
   justify-content: center;   /* centers horizontally */
   gap: 15px;                 /* space between buttons */
-  margin: 20px 0;            /* spacing from other content */
+  margin: 30px 0;            /* spacing from other content */
 }
 .controls button {
   padding: 10px 20px;
@@ -161,13 +448,225 @@
   background-color: #666;
 }
 
+/* Keep essential controls visible and fixed at bottom in fullscreen */
+body.fullscreen .controls {
+  display: flex;
+  justify-content: center;    /* center horizontally */
+  gap: 15px;
+  position: fixed;
+  bottom: 30px;               /* spacing from bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;              /* ensure they stay above characters */
+}
+
+/* Fullscreen character row should stay centered, but below controls */
+body.fullscreen .character-row {
+  min-height: calc(100vh - 100px); /* leave space for controls */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
+  z-index: 1000; /* behind controls */
+}
+/* Hide non-essential buttons in fullscreen */
+body.fullscreen .controls button:not(#nextTurnBtn):not(#fullscreenBtn) :not(#muteBtn) {
+  display: none;
+}
+
+/* Hide header, theme selector, and add-character in fullscreen */
+body.fullscreen h1,
+body.fullscreen .theme-selector,
+body.fullscreen .add-character {
+  display: none;
+}
+
+
+body.fullscreen .controls button,
+body.fullscreen .add-character,
+body.fullscreen h1,
+body.fullscreen .theme-selector {
+  display: none;
+}
+
+/* Fullscreen controls buttons */
+body.fullscreen .controls button#nextTurnBtn,
+body.fullscreen .controls button#fullscreenBtn {
+  display: inline-block;
+  min-width: 120px; /* ensures text doesn’t wrap */
+  white-space: nowrap; /* prevent breaking text into two lines */
+  padding: 10px 20px; /* optional: adjust for aesthetics */
+  text-align: center;
+}
+/* Hide cursor when inactive in fullscreen */
+body.fullscreen.cursor-hidden {
+  cursor: none;
+}
+
+
+/* Exceptions: Next Turn & Fullscreen buttons remain */
+body.fullscreen .controls button#nextTurnBtn,
+body.fullscreen .controls button#fullscreenBtn{
+  display: inline-block;
+}
+
+.character p {
+  margin: 6px 0 4px;
+  font-family: 'Uncial Antiqua', cursive;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #111;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+
+  font-size: clamp(14px, 2vw, 30px); /* responsive size */
+  line-height: 1.2;
+
+  white-space: nowrap;   /* prevent line breaks */
+  overflow: hidden;
+  text-overflow: ellipsis; /* optional: show "..." if it overflows */
+}
+
+
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.15s ease;
+  z-index: 3000;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* Mute button tooltip (top-right corner) */
+.tooltip-wrapper.mute-btn-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: inline-block;
+}
+
+.tooltip-wrapper.mute-btn-wrapper .tooltip-text {
+  visibility: hidden;
+  width: 160px;
+  background-color: rgba(0,0,0,0.8);
+  color: white;
+  text-align: center;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+
+  position: absolute;
+  top: 100%;      /* BELOW the button */
+  right: 0;
+  margin-top: 50px;
+
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tooltip-wrapper.mute-btn-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+.mute-btn {
+  position: fixed;      /* keep it fixed relative to viewport */
+  top: 20px;
+  right: 20px;
+  z-index: 9999;        /* above everything */
+  
+  padding: 8px 14px;
+  font-size: 14px;
+
+  background: rgba(20, 20, 20, 0.85);
+  color: #f5f0e6;
+  border: 1px solid rgba(255, 215, 100, 0.5);
+  border-radius: 6px;
+
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.mute-btn:hover {
+  background: rgba(40, 40, 40, 0.95);
+  transform: scale(1.05);
+}
+
+/* NO need to touch display in fullscreen */
+
+/* Top-right container */
+.mute-wrapper {
+  position: fixed;
+  top: 50px;
+  right: 100px;
+  z-index: 5000;
+}
+
+/* Prevent flex squashing */
+.mute-wrapper .tooltip-wrapper {
+  display: inline-block;
+  width: auto;
+}
+
+/* Ensure button keeps its size */
+.mute-btn {
+  white-space: nowrap;
+  min-width: 44px;
+  padding: 12px 20px;
+}
+.mute-wrapper .tooltip-text {
+  top: 250%;
+  bottom: auto;
+  left: 100%;
+  transform: translateX(-50%);
+}
 
 
 </style>
 
 
 </head>
-<body>
+<body class="theme-default">
+
+<div class="theme-selector">
+  <button id="themeToggle">Theme ▾</button>
+  <div class="theme-menu" id="themeMenu">
+    <button onclick="setTheme('default')">Default</button>
+    <button onclick="setTheme('dungeon')">Dungeon</button>
+    <button onclick="setTheme('forest')">Forest</button>
+    <button onclick="setTheme('arcane')">Arcane</button>
+    <button onclick="setTheme('spooky')">Spooky</button>
+    <button onclick="setTheme('hellfire')">Hellfire</button>
+    <button onclick="setTheme('icy')">Icy</button>
+    <button onclick="setTheme('townsquare')">Townsquare</button>
+  </div>
+</div>
+
 
 <h1>Roll For Initiative</h1>
 
@@ -182,6 +681,9 @@
 </div>
 
 <script>
+
+  let touchDraggingIndex = null;
+
 let characters = [];
   let currentTurn = 0;
   let draggedIndex = null;
@@ -198,6 +700,60 @@ function saveGame() {
     "initiativeTrackerSave",
     JSON.stringify(saveData)
   );
+}
+function saveToFile() {
+  if (characters.length === 0) {
+    alert("No characters to save.");
+    return;
+  }
+
+  const defaultName = "roll-for-initiative-save";
+  const name = prompt("Name your save file:", defaultName);
+
+  if (!name) return; // user cancelled
+
+  const saveData = {
+    characters,
+    currentTurn,
+    version: 1
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(saveData, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${name.replace(/[^a-z0-9-_ ]/gi, "_")}.json`;
+
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+const themes = [
+  "theme-default",
+  "theme-dungeon",
+  "theme-forest",
+  "theme-arcane",
+  "theme-spooky",
+  "theme-hellfire",
+  "theme-icy",
+  "theme-townsquare"
+];
+
+let currentThemeIndex = 0;
+
+function cycleTheme() {
+  currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+  document.body.className = themes[currentThemeIndex];
+
+  localStorage.setItem("initiativeTheme", themes[currentThemeIndex]);
 }
 
 
@@ -224,12 +780,8 @@ const maxHeight = Math.max(
     maxWidthPerCharacter * (isFullscreen ? 1.8 : 1.5), // sensible taller height
     isFullscreen ? 460 : 400                           // max height cap
   ),
-  150   
-                                                   // min height
+  150 // min height
 );
-
-
-
 
 
   characters.forEach((character, index) => {
@@ -242,7 +794,11 @@ const maxHeight = Math.max(
 <img src="${character.image}" style="height:${maxHeight}px; max-width:${maxWidthPerCharacter}px; object-fit: cover;">
 
       <p><strong>${character.name}</strong></p>
-      <button class="delete-btn">✖</button>
+  <div class="delete-tab">
+  <button class="delete-btn" title="Remove Character">☠</button>
+</div>
+
+
     `;
 
     // Drag & drop
@@ -256,7 +812,33 @@ const maxHeight = Math.max(
       currentTurn = 0;
       saveGame();
       renderCharacters();
+      
     });
+
+    // ===== TOUCH SUPPORT (iOS / iPad) =====
+div.addEventListener("pointerdown", (e) => {
+  if (e.pointerType !== "touch") return;
+
+  touchDraggingIndex = index;
+  div.setPointerCapture(e.pointerId);
+});
+
+div.addEventListener("pointerenter", () => {
+  if (touchDraggingIndex === null) return;
+  if (touchDraggingIndex === index) return;
+
+  const moved = characters.splice(touchDraggingIndex, 1)[0];
+  characters.splice(index, 0, moved);
+  touchDraggingIndex = index;
+
+  saveGame();
+  renderCharacters();
+});
+
+div.addEventListener("pointerup", () => {
+  touchDraggingIndex = null;
+});
+
 
     // Delete button
     div.querySelector(".delete-btn").addEventListener("click", () => {
@@ -270,10 +852,6 @@ const maxHeight = Math.max(
   });
 }
 
-
-
-  
-
 function nextTurn() {
   if (characters.length === 0) return;
 
@@ -282,11 +860,23 @@ function nextTurn() {
   if (currentTurn >= characters.length) {
     currentTurn = 0;
   }
+
+  playTurnSound(); // 🔊 sound feedback
+
   saveGame();
   renderCharacters();
 }
 
 
+document.addEventListener("keydown", (event) => {
+  // Ignore if typing in an input or file picker
+  const tag = document.activeElement.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+    // Optional: N key → Next Turn
+  if (event.key.toLowerCase() === "n") {
+    nextTurn();
+  }
+});
 
 function addCharacter() {
   const nameInput = document.getElementById("charName");
@@ -371,6 +961,50 @@ function loadGame() {
   currentTurn = saveData.currentTurn || 0;
 }
 
+function loadTheme() {
+  const savedTheme = localStorage.getItem("initiativeTheme");
+  if (savedTheme) {
+    document.body.className = savedTheme;
+    currentThemeIndex = themes.indexOf(savedTheme);
+    if (currentThemeIndex === -1) currentThemeIndex = 0;
+  }
+}
+
+loadTheme();
+
+
+function loadFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    try {
+      const data = JSON.parse(reader.result);
+
+      if (!Array.isArray(data.characters)) {
+        alert("Invalid save file.");
+        return;
+      }
+
+      characters = data.characters;
+      currentTurn = data.currentTurn || 0;
+
+      saveGame();       // optional: sync to localStorage
+      renderCharacters();
+    } catch (e) {
+      alert("Failed to load save file.");
+    }
+  };
+
+  reader.readAsText(file);
+
+  // reset input so the same file can be loaded again
+  event.target.value = "";
+}
+
+
 function resetTracker() {
   if (!confirm("Are you sure you want to reset the tracker? This will remove all characters.")) {
     return; // cancel if user clicks "Cancel"
@@ -406,17 +1040,201 @@ function toggleFullscreen() {
 loadGame();
 renderCharacters();
 
+const themeToggle = document.getElementById("themeToggle");
+const themeMenu = document.getElementById("themeMenu");
+
+themeToggle.addEventListener("click", () => {
+  themeMenu.style.display =
+    themeMenu.style.display === "block" ? "none" : "block";
+});
+
+function setTheme(theme) {
+  document.body.className = `theme-${theme}`;
+  localStorage.setItem("initiativeTheme", theme);
+  themeMenu.style.display = "none";
+}
+
+document.addEventListener("click", (event) => {
+  const themeSelector = document.querySelector(".theme-selector");
+
+  if (!themeSelector.contains(event.target)) {
+    themeMenu.style.display = "none";
+  }
+});
+
+function toggleFullscreen() {
+  const elem = document.documentElement;
+
+  if (!document.fullscreenElement) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { // Safari
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE11
+      elem.msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+// Add/remove fullscreen class to body
+document.addEventListener("fullscreenchange", () => {
+  if (document.fullscreenElement) {
+    document.body.classList.add("fullscreen");
+  } else {
+    document.body.classList.remove("fullscreen");
+  }
+});
+
+
+// Load saved theme
+const savedTheme = localStorage.getItem("initiativeTheme") || "default";
+document.body.className = `theme-${savedTheme}`;
+
+
 window.addEventListener("resize", renderCharacters);
 document.addEventListener("fullscreenchange", renderCharacters);
 
+function playTurnSound() {
+  const sound = document.getElementById("turnSound");
+  if (!sound) return;
+
+  sound.currentTime = 0; // rewind so it plays every time
+  sound.volume = 0.1;   // subtle, not annoying
+  sound.play().catch(() => {});
+}
+
+function playTurnSound() {
+  if (soundMuted) return;
+
+  turnSound.currentTime = 0;
+  turnSound.play().catch(() => {});
+}
+
+const turnSound = new Audio("sounds/turn.mp3");
+turnSound.volume = 0.1;
+turnSound.preload = "auto";
+
+let soundMuted = localStorage.getItem("soundMuted") === "true";
+
+function toggleMute() {
+  soundMuted = !soundMuted;
+  localStorage.setItem("soundMuted", soundMuted);
+
+  updateMuteButton();
+}
+
+function updateMuteButton() {
+  const btn = document.getElementById("muteBtn");
+  if (!btn) return;
+
+  btn.textContent = soundMuted ? "🔇" : "🔊 ";
+}
+
+updateMuteButton();
+
+// Keyboard shortcut: press "M" to toggle mute
+document.addEventListener("keydown", (event) => {
+  // Ignore typing in inputs
+  if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
+
+  if (event.key.toLowerCase() === "m") {
+    toggleMute();
+  }
+   // F key → Toggle Fullscreen
+  if (event.key.toLowerCase() === "f") {
+    toggleFullscreen();
+  }
+});
+
+let cursorTimeout = null;
+const CURSOR_HIDE_DELAY = 1000; // 1 second
+
+function resetCursorTimer() {
+  if (!document.body.classList.contains("fullscreen")) return;
+
+  // Show cursor immediately
+  document.body.classList.remove("cursor-hidden");
+
+  // Clear previous timer
+  if (cursorTimeout) clearTimeout(cursorTimeout);
+
+  // Start new timer
+  cursorTimeout = setTimeout(() => {
+    document.body.classList.add("cursor-hidden");
+  }, CURSOR_HIDE_DELAY);
+}
+
+// Mouse movement brings cursor back
+document.addEventListener("mousemove", resetCursorTimer);
+document.addEventListener("mousedown", resetCursorTimer);
+
+
+// Reset when entering or exiting fullscreen
+document.addEventListener("fullscreenchange", () => {
+  if (document.fullscreenElement) {
+    resetCursorTimer();
+  } else {
+    document.body.classList.remove("cursor-hidden");
+    if (cursorTimeout) clearTimeout(cursorTimeout);
+  }
+});
+
+
 </script>
+
 <div class="controls">
-  <button onclick="nextTurn()">Next Turn</button>
-   <button onclick="toggleFullscreen()">Fullscreen</button>
-   <button onclick="resetTracker()">Reset</button>
-  
+
+<!-- Next Turn button tooltip (existing) -->
+<div class="controls">
+  <div class="tooltip-wrapper control-btn-wrapper">
+    <button id="nextTurnBtn" onclick="nextTurn()">Next Turn</button>
+    <span class="tooltip-text">Press N for Next Turn</span>
+  </div>
+
+<div class="tooltip-wrapper">
+  <button id="fullscreenBtn" onclick="toggleFullscreen()">Fullscreen</button>
+  <span class="tooltip-text">Press F for Fullscreen</span>
+</div>
+
+  <button onclick="resetTracker()">Reset</button>
+  <button onclick="saveToFile()">Save to File</button>
+  <button onclick="document.getElementById('loadFileInput').click()">Load from File</button>
+</div>
+
+<div class="mute-wrapper">
+  <div class="tooltip-wrapper">
+    <button id="muteBtn" class="mute-btn" onclick="toggleMute()">🔊</button>
+    <span class="tooltip-text">Press M to Toggle Sound</span>
+  </div>
+</div>
+
+
 
 </div>
+
+
+
+</div>
+
+<input
+  type="file"
+  id="loadFileInput"
+  accept=".json"
+  style="display:none"
+  onchange="loadFromFile(event)">
+
+
+<audio id="turnSound" preload="auto">
+  <source src="sounds/turn.mp3" type="audio/wav">
+</audio>
 
 </body>
 </html>
