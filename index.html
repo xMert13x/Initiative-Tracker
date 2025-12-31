@@ -3,6 +3,8 @@
 <head>
   <link href="https://fonts.googleapis.com/css2?family=Uncial Antiqua&display=swap" rel="stylesheet">
   <title>Roll For Initiative</title>
+<link rel="icon" href="images/favicon.ico">
+
   <style>
     
     body::before {
@@ -119,14 +121,14 @@ body.theme-townsquare {
   justify-content: center;
   align-items: stretch;       /* characters fill full row height */
   gap: 0px;
-  padding: 8px 20px 0;           /* gap between edges and characters */
+  padding: 8px 10px 0;           /* gap between edges and characters */
   margin-bottom: 45px;
   overflow: visible;
 }
 
 
 .character-row .character {
-  flex: 1 1 0;               /* grow/shrink evenly */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,35 +136,49 @@ body.theme-townsquare {
 
 .character img {
   width: 100%;
+  height: auto;
   max-height: 460px;
   object-fit: cover;
-  border: 2px solid black;
+  display: block;
 }
 
-.character {
-  position: relative;
+.character { 
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  flex: 0 0 auto;
-  max-width: 260px;
-  max-height: 460px;
-
-  padding: 8px;
-  text-align: center;
-  cursor: grab;
-  touch-action: none;
-
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(
     180deg,
     rgba(255,255,255,0.8),
     rgba(220,220,220,0.6)
   );
+
   border: 3px solid #444;
   border-radius: 12px;
+  padding: 8px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.5);
-  transition: transform 0.2s, box-shadow 0.2s, filter 0.3s;
+}
+
+.character p {
+  margin: 6px 0 0;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: 'Uncial Antiqua', cursive;
+  font-weight: bold;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.character p strong {
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .fullscreen .character-row {
@@ -173,7 +189,6 @@ body.theme-townsquare {
   margin-bottom: 0;           /* remove extra margin */
 }
 
-
 .character {
   filter: brightness(0.75) saturate(0.8);
   transition: filter 0.3s ease, transform 0.3s ease;
@@ -181,19 +196,6 @@ body.theme-townsquare {
 
 .character:not(.active) {
   filter: brightness(0.75) saturate(0.8) blur(0.5px);
-}
-
-
-.character p {
-  margin: 6px 0 4px;
-  font-family: 'Uncial Antiqua', cursive;
-  font-size: 30px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  color: #111;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
-   font-size: clamp(14px, 2vw, 30px);
-  line-height: 2.0;
 }
 
 .character.active {
@@ -328,7 +330,7 @@ body.theme-townsquare {
 
 .delete-btn .skull {
   display: inline-block;
-  transform: translateY(-4.5px); /* adjust visually */
+  transform: translateY(-4px); /* adjust visually */
 }
 
 
@@ -374,7 +376,7 @@ body.fullscreen .controls {
   justify-content: center;    /* center horizontally */
   gap: 15px;
   position: fixed;
-  bottom: 130px;               /* spacing from bottom */
+  bottom: 120px;               /* spacing from bottom */
   left: 50%;
   transform: translateX(-50%);
   z-index: 2000;              /* ensure they stay above characters */
@@ -421,22 +423,6 @@ body.fullscreen .controls button#fullscreenBtn {
 /* Hide cursor when inactive in fullscreen */
 body.fullscreen.cursor-hidden {
   cursor: none;
-}
-
-.character p {
-  margin: 6px 0 4px;
-  font-family: 'Uncial Antiqua', cursive;
-  font-weight: bold;
-  letter-spacing: 1px;
-  color: #111;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
-
-  font-size: clamp(14px, 2vw, 30px); /* responsive size */
-  line-height: 1.2;
-
-  white-space: nowrap;   /* prevent line breaks */
-  overflow: hidden;
-  text-overflow: ellipsis; /* optional: show "..." if it overflows */
 }
 
 .tooltip-wrapper {
@@ -688,10 +674,26 @@ function renderCharacters() {
 
   if (currentTurn >= characters.length) currentTurn = 0;
 
-  // Calculate max width per character
- const maxWidthPerCharacter = Math.min(
-  (window.innerWidth - 40 - 10 * (characters.length - 1)) / characters.length, // width based on number of characters
-  250 // maximum width per character
+const GAP = 10;                 // visual gap between cards
+const MAX_CHARACTER_WIDTH = 250;
+const MIN_CHARACTER_WIDTH = 130;
+
+// Measure the actual row width (NOT window width)
+const rowWidth = row.clientWidth;
+
+// Total gap space between characters
+const totalGapWidth = GAP * (characters.length - 1);
+
+// Available width for character cards
+const availableWidth = rowWidth - totalGapWidth;
+
+// Final width per character
+const characterWidth = Math.max(
+  MIN_CHARACTER_WIDTH,
+  Math.min(
+    availableWidth / Math.max(characters.length, 1),
+    MAX_CHARACTER_WIDTH
+  )
 );
 
   // Set height proportional to width (for uniform display boxes)
@@ -699,12 +701,13 @@ const isFullscreen = document.fullscreenElement !== null;
 
 const maxHeight = Math.max(
   Math.min(
-    maxWidthPerCharacter * (isFullscreen ? 1.8 : 1.5), // sensible taller height
-    isFullscreen ? 460 : 400                           // max height cap
+    characterWidth * (isFullscreen ? 1.8 : 1.5),
+    isFullscreen ? 460 : 400
   ),
-  150 // min height
+  150
 );
 
+const nameFontSize = getNameFontSize(characters.length);
 
   characters.forEach((character, index) => {
     const div = document.createElement("div");
@@ -712,17 +715,21 @@ const maxHeight = Math.max(
     if (index === currentTurn) div.classList.add("active");
     div.draggable = true;
 
-    div.innerHTML = `
-<img src="${character.image}" style="height:${maxHeight}px; max-width:${maxWidthPerCharacter}px; object-fit: cover;">
+div.style.width = `${characterWidth}px`;
+div.style.flex = `0 0 ${characterWidth}px`;
 
-      <p><strong>${character.name}</strong></p>
+div.innerHTML = `
+  <img src="${character.image}" style="height:${maxHeight}px;">
+  <p>
+    <strong style="font-size:${nameFontSize}px;">
+      ${character.name}
+    </strong>
+  </p>
   <div class="delete-tab">
-  <button class="delete-btn"><span class="skull">☠</span></button>
+    <button class="delete-btn"><span class="skull">☠</span></button>
+  </div>
+`;
 
-</div>
-
-
-    `;
 
     // Drag & drop
     div.addEventListener("dragstart", () => draggedIndex = index);
@@ -774,6 +781,15 @@ div.addEventListener("pointerup", () => {
     row.appendChild(div);
   });
 }
+
+function getNameFontSize(characterCount) {
+  if (characterCount <= 4) return 28;
+  if (characterCount <= 6) return 24;
+  if (characterCount <= 8) return 20;
+  if (characterCount <= 10) return 16;
+  return 11;
+}
+
 
 function nextTurn() {
   if (characters.length === 0) return;
@@ -866,8 +882,6 @@ function addCharacter() {
 
   reader.readAsDataURL(file);
 }
-
-
 
 
 function loadGame() {
