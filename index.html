@@ -3,8 +3,7 @@
 <head>
   <link href="https://fonts.googleapis.com/css2?family=Uncial Antiqua&display=swap" rel="stylesheet">
   <title>Roll For Initiative</title>
-<link rel="icon" href="favicon.ico">
-
+<link rel="icon" href="images/favicon.ico">
 
   <style>
     
@@ -59,7 +58,7 @@ body.theme-townsquare {
   background-image: url('images/townsquare.jpeg');
 }
 
-    body.theme-fey {
+body.theme-fey {
   background-image: url('images/fey.png');
 }
 
@@ -69,12 +68,12 @@ body.theme-townsquare {
   text-align: center;
   color: black; /* optional, gives a D&D feel */
   text-shadow: 2px 2px 4px white; /* adds depth */
-  margin-top: 20px;
+  margin-top: -30px;
   margin-bottom: 0px;
 }
 
 .theme-selector {
-  position: fixed;
+  position: relative;
   top: 15px;
   left: 15px;
   z-index: 1000;
@@ -95,8 +94,12 @@ body.theme-townsquare {
 }
 
 .theme-menu {
+  position: absolute;
   display: none;
   margin-top: 0px;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
   background-color: rgba(0, 0, 0, 0.243);
   border: 1px solid #555;
   border-radius: 8px;
@@ -193,10 +196,6 @@ body.theme-townsquare {
   margin-bottom: 0;           /* remove extra margin */
 }
 
-.character {
-  filter: brightness(0.75) saturate(0.8);
-  transition: filter 0.3s ease, transform 0.3s ease;
-}
 
 .character:not(.active) {
   filter: brightness(0.75) saturate(0.8) blur(0.5px);
@@ -205,8 +204,8 @@ body.theme-townsquare {
 .character.active {
   background: linear-gradient(
     180deg,
-    rgba(255, 215, 0, 0.35),
-    rgba(255, 255, 255, 0.6)
+    rgba(255, 215, 0, 0.8),
+    rgba(255, 255, 255, 1.0)
   );
   border-color: gold;
   box-shadow:
@@ -214,11 +213,14 @@ body.theme-townsquare {
     0 0 25px rgba(255, 215, 0, 0.6),
     0 0 45px rgba(255, 215, 0, 0.4);
   animation: heroicGlow 1.8s ease-in-out infinite;
-}
-
-.character.active {
   filter: brightness(1.1) saturate(1.2);
   transform: translateY(-4px);
+  transform: scale(1.1);
+  transition: transform 0.55s ease-out-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease-out-bezier(0.22, 1, 0.36, 1),
+    filter 0.5s ease;
+  z-index:2;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
 
@@ -246,11 +248,19 @@ body.theme-townsquare {
 .character:active {
   cursor: grabbing;
 }
+
+.character {
+  transition-property: transform, box-shadow, filter;
+  transition-duration: 1.6s;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
 .add-character {
   display: flex;
   justify-content: center;   /* centers horizontally */
   gap: 15px;                 /* space between inputs and button */
-  margin: 20px 0;            /* spacing from other content */
+  margin: 30px 0;            /* spacing from other content */
   flex-wrap: wrap;           /* ensures responsiveness on smaller screens */
 }
 
@@ -263,6 +273,7 @@ body.theme-townsquare {
   background-color: #222;
   color: white;
   outline: none;
+  margin-top: -30px;
 }
 
 .add-character input:focus {
@@ -404,8 +415,12 @@ body.fullscreen .controls button:not(#nextTurnBtn):not(#fullscreenBtn) {
 body.fullscreen h1,
 body.fullscreen .theme-selector,
 body.fullscreen .add-character,
-body.fullscreen .mute-btn {
-  display: none;
+body.fullscreen .mute-btn,
+body.fullscreen #custom-bg-wrapper,
+body.fullscreen #customBgInput,
+ body.fullscreen #clearCustomBgBtn {
+  display: none !important;
+
 }
 
 
@@ -546,6 +561,62 @@ body.fullscreen.cursor-hidden {
   transform: translateX(-50%);
 }
 
+.theme-selector .tooltip-text {
+  position: absolute;
+  top: 150%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+
+  white-space: nowrap;
+
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+
+  display: flex;             /* ✅ make container flex */
+  align-items: center;       /* ✅ vertically center text */
+  justify-content: center;   /* horizontally center (optional) */
+
+  z-index: 2000;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.15s ease;
+}
+
+.theme-selector:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-bg-wrapper {
+  position: fixed;
+  top: 15px;    /* just below theme button */
+  left: 110px;
+  z-index: 1000;
+  display: flex;
+  gap: 5px;
+}
+
+.custom-bg-wrapper input,
+.custom-bg-wrapper button {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: white;
+  cursor: pointer;
+}
+.custom-bg-wrapper button:hover {
+  background-color: #444;
+}
+
 
 </style>
 
@@ -553,8 +624,10 @@ body.fullscreen.cursor-hidden {
 </head>
 <body class="theme-default" tabindex="0">
 
-<div class="theme-selector">
+<div class="theme-selector tooltip-wrapper">
   <button id="themeToggle">Theme ▾</button>
+  <span class="tooltip-text">Press T to Toggle Theme</span>
+
   <div class="theme-menu" id="themeMenu">
     <button onclick="setTheme('default')">Default</button>
     <button onclick="setTheme('dungeon')">Dungeon</button>
@@ -564,10 +637,13 @@ body.fullscreen.cursor-hidden {
     <button onclick="setTheme('hellfire')">Hellfire</button>
     <button onclick="setTheme('icy')">Icy</button>
     <button onclick="setTheme('townsquare')">Townsquare</button>
-     <button onclick="setTheme('fey')">Fey</button>
+    <button onclick="setTheme('fey')">Fey</button>
+    <button id="customBgBtn">Custom</button>
   </div>
 </div>
 
+
+  <input type="file" id="customBgInput" accept="image/*" style="display:none">
 
 <h1>Roll For Initiative</h1>
 
@@ -605,6 +681,7 @@ body.fullscreen.cursor-hidden {
     <span class="tooltip-text">Press M to Toggle Sound</span>
   </div>
 </div>
+
 
 <input
   type="file"
@@ -785,6 +862,16 @@ div.addEventListener("pointerup", () => {
 
     row.appendChild(div);
   });
+
+  updateActiveCharacter();
+}
+
+function updateActiveCharacter() {
+  const cards = document.querySelectorAll(".character");
+
+  cards.forEach((card, index) => {
+    card.classList.toggle("active", index === currentTurn);
+  });
 }
 
 function getNameFontSize(characterCount) {
@@ -795,32 +882,17 @@ function getNameFontSize(characterCount) {
   return 11;
 }
 
-
 function nextTurn() {
   if (characters.length === 0) return;
 
-  currentTurn++;
+  currentTurn = (currentTurn + 1) % characters.length;
 
-  if (currentTurn >= characters.length) {
-    currentTurn = 0;
-  }
-
-  playTurnSound(); // 🔊 sound feedback
-
+  playTurnSound();
   saveGame();
-  renderCharacters();
+
+  updateActiveCharacter(); // ← THIS is the key
 }
 
-
-document.addEventListener("keydown", (event) => {
-  // Ignore if typing in an input or file picker
-  const tag = document.activeElement.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA") return;
-    // Optional: N key → Next Turn
-  if (event.key.toLowerCase() === "n") {
-    nextTurn();
-  }
-});
 
 function addCharacter() {
   const nameInput = document.getElementById("charName");
@@ -903,12 +975,37 @@ function loadGame() {
   currentTurn = saveData.currentTurn || 0;
 }
 
+let activeTheme = localStorage.getItem("initiativeTheme") || "default";
+
 function loadTheme() {
-  const savedTheme = localStorage.getItem("initiativeTheme");
-  if (savedTheme) {
-    document.body.className = `theme-${savedTheme}`;
+  const savedTheme =
+    localStorage.getItem("initiativeTheme") || "default";
+
+  activeTheme = savedTheme;
+
+  // Remove all theme-* classes first
+  document.body.classList.forEach(cls => {
+    if (cls.startsWith("theme-")) {
+      document.body.classList.remove(cls);
+    }
+  });
+
+  if (savedTheme === "custom") {
+    const customBg = localStorage.getItem("customBackground");
+    if (customBg) {
+      document.body.style.backgroundImage = `url(${customBg})`;
+    } else {
+      // Fallback if custom is missing
+      document.body.classList.add("theme-default");
+      activeTheme = "default";
+      localStorage.setItem("initiativeTheme", "default");
+    }
+  } else {
+    document.body.style.backgroundImage = "";
+    document.body.classList.add(`theme-${savedTheme}`);
   }
 }
+
 
 
 function loadFromFile(event) {
@@ -955,6 +1052,7 @@ function resetTracker() {
 }
 
 loadGame();
+loadTheme();
 renderCharacters();
 
 const themeToggle = document.getElementById("themeToggle");
@@ -966,20 +1064,80 @@ themeToggle.addEventListener("click", () => {
 });
 
 function setTheme(theme) {
-  document.body.className = `theme-${theme}`;
+  activeTheme = theme;
   localStorage.setItem("initiativeTheme", theme);
+
+  // Remove all theme-* classes
+  document.body.classList.forEach(cls => {
+    if (cls.startsWith("theme-")) {
+      document.body.classList.remove(cls);
+    }
+  });
+
+  if (theme === "custom") {
+    const customBg = localStorage.getItem("customBackground");
+    if (customBg) {
+      document.body.style.backgroundImage = `url(${customBg})`;
+    }
+  } else {
+    document.body.style.backgroundImage = "";
+    document.body.classList.add(`theme-${theme}`);
+  }
+
   themeMenu.style.display = "none";
+  enforceFullscreenUIState();
 }
 
 loadTheme();
 
-document.addEventListener("click", (event) => {
-  const themeSelector = document.querySelector(".theme-selector");
+const customBgBtn = document.getElementById("customBgBtn");
+const customBgInput = document.getElementById("customBgInput");
 
-  if (!themeSelector.contains(event.target)) {
-    themeMenu.style.display = "none";
-  }
+customBgBtn.addEventListener("click", () => {
+  customBgInput.click();
 });
+
+customBgInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // ✅ Save current theme BEFORE custom background
+  const currentTheme =
+    localStorage.getItem("initiativeTheme") || "default";
+  localStorage.setItem("previousTheme", currentTheme);
+
+  const reader = new FileReader();
+ reader.onload = function () {
+  const dataUrl = reader.result;
+  localStorage.setItem("customBackground", dataUrl);
+  setTheme("custom");
+};
+  reader.readAsDataURL(file);
+
+  customBgInput.value = "";
+});
+
+
+const themeOrder = [
+  "default",
+  "dungeon",
+  "forest",
+  "arcane",
+  "spooky",
+  "hellfire",
+  "icy",
+  "townsquare",
+  "fey",
+  "custom"
+];
+
+function toggleThemeByKey() {
+  const current = activeTheme || "default";
+  const index = themeOrder.indexOf(current);
+  const next = themeOrder[(index + 1) % themeOrder.length];
+  setTheme(next);
+}
+
 
 function toggleFullscreen() {
   const elem = document.documentElement;
@@ -1003,9 +1161,17 @@ function toggleFullscreen() {
   }
 }
 
-// Load saved theme
-const savedTheme = localStorage.getItem("initiativeTheme") || "default";
-document.body.className = `theme-${savedTheme}`;
+function enforceFullscreenCursorState() {
+  if (!document.fullscreenElement) return;
+
+  document.body.classList.remove("cursor-hidden");
+
+  if (cursorTimeout) clearTimeout(cursorTimeout);
+
+  cursorTimeout = setTimeout(() => {
+    document.body.classList.add("cursor-hidden");
+  }, CURSOR_HIDE_DELAY);
+}
 
 
 window.addEventListener("resize", renderCharacters);
@@ -1043,20 +1209,6 @@ if (muteBtn) {
 }
 
 updateMuteButton();
-
-// Keyboard shortcut: press "M" to toggle mute
-document.addEventListener("keydown", (event) => {
-  // Ignore typing in inputs
-  if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
-
-  if (event.key.toLowerCase() === "m") {
-    toggleMute();
-  }
-   // F key → Toggle Fullscreen
-  if (event.key.toLowerCase() === "f") {
-    toggleFullscreen();
-  }
-});
 
 let cursorTimeout = null;
 const CURSOR_HIDE_DELAY = 1000; // 1 second
@@ -1110,6 +1262,18 @@ document.getElementById("saveBtn").addEventListener("click", saveToFile);
 
 document.getElementById("loadBtn").addEventListener("click", () => {
   document.getElementById("loadFileInput").click();
+});
+
+document.addEventListener("keydown", (event) => {
+  const tag = event.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+  const key = event.key.toLowerCase();
+
+  if (key === "n") nextTurn();
+  if (key === "t") toggleThemeByKey();
+  if (key === "m") toggleMute();
+  if (key === "f") toggleFullscreen();
 });
 
 </script>
