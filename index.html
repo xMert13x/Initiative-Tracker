@@ -16,6 +16,11 @@
   z-index: -1;
 }
 
+html {
+  height: 100%;
+  width: 100%;
+}
+
 body {
   background-size: cover;       /* makes it fill the screen */
   background-position: center;  /* centers the image */
@@ -23,6 +28,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif; /* fallback font for content */
+  display: flex;
+  flex-direction: column;
+  transition: background-image 0.8s ease-in-out;
+}
+
+body.fullscreen {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 /* === BACKGROUND THEMES === */
@@ -131,6 +145,7 @@ body.theme-fey {
   padding: 8px 10px 0;           /* gap between edges and characters */
   margin-bottom: 45px;
   overflow: visible;
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, height 0.6s ease-out, max-height 0.6s ease-out, width 0.6s ease-out, margin 0.6s ease-out, padding 0.6s ease-out;
 }
 
 
@@ -147,6 +162,7 @@ body.theme-fey {
   max-height: 460px;
   object-fit: cover;
   display: block;
+  transition: max-height 0.6s ease-out;
 }
 
 .character { 
@@ -166,6 +182,14 @@ body.theme-fey {
   border-radius: 12px;
   padding: 8px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.8s ease-out,
+    filter 0.8s ease-out,
+    border-color 0.8s ease-out,
+    background 0.8s ease-out,
+    height 1.0s ease-out,
+    max-height 1.0s ease-out,
+    padding 1.0s ease-out;
 }
 
 .character p {
@@ -190,15 +214,21 @@ body.theme-fey {
 
 .fullscreen .character-row {
   display: flex;
+  flex-direction: row;
   justify-content: center;    /* horizontal centering */
   align-items: center;        /* vertical centering */
-  min-height: 100vh;          /* full viewport height */
-  margin-bottom: 0;           /* remove extra margin */
+  height: 100vh;              /* full viewport height */
+  width: 100vw;               /* full viewport width */
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  transform: translateY(-50px);
+  transition: transform 0.6s ease-out;
 }
 
 
 .character:not(.active) {
-  filter: brightness(0.75) saturate(0.8) blur(0.5px);
+  filter: brightness(0.65) saturate(0.7) blur(0.3px);
 }
 
 .character.active {
@@ -208,19 +238,14 @@ body.theme-fey {
     rgba(255, 255, 255, 1.0)
   );
   border-color: gold;
-  box-shadow:
-    0 0 12px rgba(255, 215, 0, 0.8),
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8),
     0 0 25px rgba(255, 215, 0, 0.6),
-    0 0 45px rgba(255, 215, 0, 0.4);
+    0 0 45px rgba(255, 215, 0, 0.4),
+    0 18px 40px rgba(0, 0, 0, 0.45);
   animation: heroicGlow 1.8s ease-in-out infinite;
   filter: brightness(1.1) saturate(1.2);
-  transform: translateY(-4px);
-  transform: scale(1.1);
-  transition: transform 0.55s ease-out-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.45s ease-out-bezier(0.22, 1, 0.36, 1),
-    filter 0.5s ease;
-  z-index:2;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  transform: translateY(-4px) scale(1.1);
+  z-index: 2;
 }
 
 
@@ -249,11 +274,7 @@ body.theme-fey {
   cursor: grabbing;
 }
 
-.character {
-  transition-property: transform, box-shadow, filter;
-  transition-duration: 1.6s;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
+
 
 
 .add-character {
@@ -368,7 +389,7 @@ body.theme-fey {
   justify-content: center;   /* centers horizontally */
   gap: 15px;                 /* space between buttons */
   margin: 55px 0 5px 0;            /* spacing from other content */
-  
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out, transform 0.6s ease-out, justify-content 0.6s ease-out;
 }
 .controls button {
   padding: 10px 20px;
@@ -390,56 +411,58 @@ body.fullscreen .controls {
   display: flex;
   justify-content: center;    /* center horizontally */
   gap: 15px;
-  position: fixed;
-  bottom: 120px;               /* spacing from bottom */
-  left: 50%;
-  transform: translateX(-50%);
+  margin: 55px 0 5px 0;
   z-index: 2000;              /* ensure they stay above characters */
+  width: 100%;
 }
 
-/* Fullscreen character row should stay centered, but below controls */
-body.fullscreen .character-row {
-  min-height: calc(100vh - 0px); /* leave space for controls */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0;
-  z-index: 1000; /* behind controls */
-}
-/* Hide non-essential buttons in fullscreen */
-body.fullscreen .controls button:not(#nextTurnBtn):not(#fullscreenBtn) {
-  display: none;
+
+
+/* Hide all buttons in fullscreen */
+body.fullscreen .controls {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Hide header, theme selector, and add-character in fullscreen */
+h1,
+.add-character {
+  transition: opacity 0.6s ease-out 0.6s, visibility 0.6s ease-out 0.6s;
+}
+
+.theme-selector,
+.mute-btn,
+#custom-bg-wrapper,
+#customBgInput,
+#clearCustomBgBtn {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+body.fullscreen h1,
+body.fullscreen .add-character {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+body.fullscreen .theme-selector,
+body.fullscreen .mute-btn,
+body.fullscreen #custom-bg-wrapper,
+body.fullscreen #customBgInput,
+body.fullscreen #clearCustomBgBtn {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
 body.fullscreen h1,
 body.fullscreen .theme-selector,
 body.fullscreen .add-character,
 body.fullscreen .mute-btn,
 body.fullscreen #custom-bg-wrapper,
 body.fullscreen #customBgInput,
- body.fullscreen #clearCustomBgBtn {
-  display: none !important;
-
+body.fullscreen #clearCustomBgBtn {
+  opacity: 0;
+  visibility: hidden;
 }
 
-
-body.fullscreen .controls button,
-body.fullscreen .add-character,
-body.fullscreen h1 {
-  display: none;
-}
-
-/* Fullscreen controls buttons */
-body.fullscreen .controls button#nextTurnBtn,
-body.fullscreen .controls button#fullscreenBtn {
-  display: inline-block;
-  min-width: 120px; /* ensures text doesn’t wrap */
-  white-space: nowrap; /* prevent breaking text into two lines */
-  padding: 10px 20px; /* optional: adjust for aesthetics */
-  text-align: center;
-}
-/* Hide cursor when inactive in fullscreen */
 body.fullscreen.cursor-hidden {
   cursor: none;
 }
@@ -554,12 +577,7 @@ body.fullscreen.cursor-hidden {
   min-width: 44px;
   padding: 12px 20px;
 }
-.mute-wrapper .tooltip-text {
-  top: 250%;
-  bottom: auto;
-  left: 100%;
-  transform: translateX(-50%);
-}
+
 
 .theme-selector .tooltip-text {
   position: absolute;
@@ -690,10 +708,6 @@ body.fullscreen.cursor-hidden {
   style="display:none"
   onchange="loadFromFile(event)">
 
-
-<audio id="turnSound" preload="auto">
-  <source src="sounds/turn.mp3" type="audio/wav">
-</audio>
 
 <script>
 
@@ -1087,8 +1101,6 @@ function setTheme(theme) {
   themeMenu.style.display = "none";
   enforceFullscreenUIState();
 }
-
-loadTheme();
 
 const customBgBtn = document.getElementById("customBgBtn");
 const customBgInput = document.getElementById("customBgInput");
