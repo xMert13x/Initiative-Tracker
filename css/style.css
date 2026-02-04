@@ -1,0 +1,691 @@
+* {
+  box-sizing: border-box;
+}
+
+body::before {
+content: "";
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background-color: rgba(0, 0, 0, 0.2); /* dark overlay */
+z-index: -1;
+}
+
+html {
+height: 100%;
+width: 100%;
+overflow-x: hidden;
+}
+
+body {
+background-size: cover;       /* makes it fill the screen */
+background-position: center;  /* centers the image */
+background-attachment: fixed; /* stays in place when scrolling */
+margin: 0;
+padding: 0;
+font-family: Arial, sans-serif; /* fallback font for content */
+display: flex;
+flex-direction: column;
+transition: background-image 0.8s ease-in-out;
+overflow-x: hidden;
+}
+
+body.fullscreen {
+height: 100vh;
+width: 100vw;
+overflow: hidden;
+}
+
+/* === BACKGROUND THEMES === */
+
+body.theme-default {
+background-image: url('images/background.png');
+background-color: #3a3a3a;
+}
+
+body.theme-dungeon {
+background-image: url('images/dungeon.jpeg');
+background-color: #2a1a1a;
+}
+
+body.theme-forest {
+background-image: url('images/forest.jpeg');
+background-color: #1a2a1a;
+}
+
+body.theme-arcane {
+background-image: url('images/arcane.jpeg');
+background-color: #2a1a3a;
+}
+
+body.theme-spooky {
+background-image: url('images/spooky.jpeg');
+background-color: #1a1a2a;
+}
+body.theme-hellfire {
+background-image: url('images/hellfire.jpeg');
+background-color: #3a1a1a;
+}
+
+body.theme-icy {
+background-image: url('images/icy.jpeg');
+background-color: #1a3a3a;
+}
+
+body.theme-townsquare {
+background-image: url('images/townsquare.jpeg');
+background-color: #2a2a1a;
+}
+
+body.theme-fey {
+background-image: url('images/fey.png');
+background-color: #2a3a1a;
+}
+
+h1 {
+font-family: 'Uncial Antiqua', cursive;
+font-size: 100px; /* you can adjust */
+text-align: center;
+color: black; /* optional, gives a D&D feel */
+text-shadow: 2px 2px 4px white; /* adds depth */
+margin-top: -30px;
+margin-bottom: 0px;
+}
+
+.theme-selector {
+position: relative;
+top: 15px;
+left: 15px;
+z-index: 1000;
+}
+
+#themeToggle {
+padding: 8px 14px;
+font-size: 14px;
+border-radius: 8px;
+background-color: #222;
+color: white;
+border: 1px solid #555;
+cursor: pointer;
+}
+
+#themeToggle:hover {
+background-color: #444;
+}
+
+.theme-menu {
+position: absolute;
+display: none;
+margin-top: 0px;
+top: 100%;
+left: 0;
+z-index: 1000;
+background-color: rgba(0, 0, 0, 0.243);
+border: 1px solid #555;
+border-radius: 8px;
+overflow: hidden;
+}
+
+.theme-menu button {
+  display: block;
+  width: 100%;
+  padding: 2.3px 12px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.theme-menu button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+.character-row {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;       /* characters fill full row height */
+  gap: 0px;
+  padding: 8px 10px 0;           /* gap between edges and characters */
+  margin-bottom: 45px;
+  overflow: visible;
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, height 0.6s ease-out, max-height 0.6s ease-out, width 0.6s ease-out, margin 0.6s ease-out, padding 0.6s ease-out;
+}
+
+
+.character-row .character {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.character img {
+  width: 100%;
+  height: auto;
+  max-height: 460px;
+  object-fit: cover;
+  display: block;
+  transition: max-height 0.6s ease-out;
+}
+
+.character { 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.8),
+    rgba(220,220,220,0.6)
+  );
+
+  border: 3px solid #444;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.8s ease-out,
+    filter 0.8s ease-out,
+    border-color 0.8s ease-out,
+    background 0.8s ease-out,
+    height 1.0s ease-out,
+    max-height 1.0s ease-out,
+    padding 1.0s ease-out;
+}
+
+.character p {
+  margin: 6px 0 0;
+  padding: 0;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: 'Uncial Antiqua', cursive;
+  font-weight: bold;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.character p strong {
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.fullscreen .character-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;    /* horizontal centering */
+  align-items: center;        /* vertical centering */
+  height: 100vh;              /* full viewport height */
+  width: 100vw;               /* full viewport width */
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  transform: translateY(-50px);
+  transition: transform 0.6s ease-out;
+}
+
+
+.character:not(.active) {
+  filter: brightness(0.65) saturate(0.7) blur(0.3px);
+}
+
+.character.active {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 215, 0, 0.8),
+    rgba(255, 255, 255, 1.0)
+  );
+  border-color: gold;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8),
+    0 0 25px rgba(255, 215, 0, 0.6),
+    0 0 45px rgba(255, 215, 0, 0.4),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+  animation: heroicGlow 1.8s ease-in-out infinite;
+  filter: brightness(1.1) saturate(1.2);
+  transform: translateY(-4px) scale(1.1);
+  z-index: 2;
+}
+
+
+@keyframes heroicGlow {
+  0% {
+    box-shadow:
+      0 0 12px rgba(255, 215, 0, 0.6),
+      0 0 25px rgba(255, 215, 0, 0.4),
+      0 0 45px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(255, 215, 0, 0.9),
+      0 0 35px rgba(255, 215, 0, 0.7),
+      0 0 65px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    box-shadow:
+      0 0 12px rgba(255, 215, 0, 0.6),
+      0 0 25px rgba(255, 215, 0, 0.4),
+      0 0 45px rgba(255, 215, 0, 0.2);
+  }
+}
+
+.character:active {
+  cursor: grabbing;
+}
+
+
+
+
+
+.add-character {
+  display: flex;
+  justify-content: center;   /* centers horizontally */
+  gap: 15px;                 /* space between inputs and button */
+  margin: 30px 0;            /* spacing from other content */
+  flex-wrap: wrap;           /* ensures responsiveness on smaller screens */
+}
+
+.add-character input,
+.add-character button {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: white;
+  outline: none;
+  margin-top: -30px;
+}
+
+.add-character input:focus {
+  border-color: #888;
+}
+
+.add-character button {
+  cursor: pointer;
+  border: none;
+  background-color: #444;
+  transition: background-color 0.2s;
+}
+
+.add-character button:hover {
+  background-color: #666;
+}
+
+.character:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+
+.delete-btn:hover {
+  background: radial-gradient(circle at top left, #f00, #800);
+  transform: scale(1.1);
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+.delete-tab {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  width: 52px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease 0.25s, transform 0.25s ease 0.25s;
+}
+
+.character:hover .delete-tab {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.delete-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at top, #aa0000, #550000);
+  color: white;
+  border: 2px solid black;
+  cursor: pointer;
+  font-size: 50px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn .skull {
+  display: inline-block;
+  transform: translateY(-4px); /* adjust visually */
+}
+
+
+.delete-btn:hover {
+  background: radial-gradient(circle at top, #ff3333, #880000);
+  transform: scale(1.1);
+}
+
+.character::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 10px;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;   /* centers horizontally */
+  gap: 15px;                 /* space between buttons */
+  margin: 55px 0 5px 0;            /* spacing from other content */
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out, transform 0.6s ease-out, justify-content 0.6s ease-out;
+}
+.controls button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #444;
+  color: white;
+  transition: background-color 0.2s;
+  
+}
+
+.controls button:hover {
+  background-color: #666;
+}
+
+body.fullscreen .controls {
+  display: flex;
+  justify-content: center;    /* center horizontally */
+  gap: 15px;
+  margin: 55px 0 5px 0;
+  z-index: 2000;              /* ensure they stay above characters */
+  width: 100%;
+}
+
+
+
+
+/* Hide all buttons in fullscreen */
+body.fullscreen .controls {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Hide header, theme selector, and add-character in fullscreen */
+h1,
+.add-character {
+  transition: opacity 0.6s ease-out 0.6s, visibility 0.6s ease-out 0.6s;
+}
+
+.theme-selector,
+.mute-btn,
+#custom-bg-wrapper,
+#customBgInput,
+#clearCustomBgBtn {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+body.fullscreen h1,
+body.fullscreen .add-character {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+body.fullscreen .theme-selector,
+body.fullscreen .mute-btn,
+body.fullscreen #custom-bg-wrapper,
+body.fullscreen #customBgInput,
+body.fullscreen #clearCustomBgBtn {
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+body.fullscreen h1,
+body.fullscreen .add-character {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.fullscreen.cursor-hidden {
+  cursor: none;
+}
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.15s ease;
+  z-index: 3000;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mute button tooltip (top-right corner) */
+.tooltip-wrapper.mute-btn-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: inline-block;
+}
+
+.fixed-tooltip {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.mute-wrapper:hover .fixed-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mute-btn {
+  white-space: nowrap;
+  min-width: 44px;
+  padding: 12px 20px;
+  font-size: 14px;
+  background: rgba(20, 20, 20, 0.85);
+  color: #f5f0e6;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.mute-btn:hover {
+  background: rgba(40, 40, 40, 0.95);
+  transform: scale(1.05);
+}
+
+/* NO need to touch display in fullscreen */
+
+/* Top-right container */
+.mute-wrapper {
+  position: fixed;
+  top: 50px;
+  right: 100px;
+  z-index: 5000;
+}
+
+/* Prevent flex squashing */
+.mute-wrapper .tooltip-wrapper {
+  display: inline-block;
+  width: auto;
+}
+
+/* Ensure button keeps its size */
+.mute-btn {
+  white-space: nowrap;
+  min-width: 44px;
+  padding: 12px 20px;
+}
+
+/* Remote button styles */
+#remoteBtn {
+  position: static;
+  padding: 12px 20px;
+  font-size: 14px;
+  background: rgba(20, 20, 20, 0.85);
+  color: #f5f0e6;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  opacity: 1;
+  visibility: visible;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+#remoteBtn:hover {
+  background: rgba(40, 40, 40, 0.95);
+  transform: scale(1.05);
+}
+
+/* Ensure remote button fades out in fullscreen */
+body.fullscreen #remoteBtn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+/* Tavern button styles */
+.tavern-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 16px;
+  font-size: 20px;
+  background: rgba(20, 20, 20, 0.85);
+  color: #f5f0e6;
+  border: 1px solid #555;
+  border-radius: 6px;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  opacity: 1;
+  visibility: visible;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.6s ease-out, visibility 0.6s ease-out;
+  cursor: pointer;
+}
+
+.tavern-btn:hover {
+  background: rgba(40, 40, 40, 0.95);
+  transform: scale(1.1);
+}
+
+/* Ensure tavern button fades out in fullscreen */
+body.fullscreen .tavern-btn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+}
+
+
+
+.theme-selector .tooltip-text {
+  position: absolute;
+  top: 150%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+
+  white-space: nowrap;
+
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 12px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+
+  display: flex;             /* ✅ make container flex */
+  align-items: center;       /* ✅ vertically center text */
+  justify-content: center;   /* horizontally center (optional) */
+
+  z-index: 2000;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.15s ease;
+}
+
+.theme-selector:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-bg-wrapper {
+  position: fixed;
+  top: 15px;    /* just below theme button */
+  left: 110px;
+  z-index: 1000;
+  display: flex;
+  gap: 5px;
+}
+
+.custom-bg-wrapper input,
+.custom-bg-wrapper button {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: white;
+  cursor: pointer;
+}
+.custom-bg-wrapper button:hover {
+  background-color: #444;
+}
