@@ -167,6 +167,7 @@ const nameFontSize = getNameFontSize(characters.length);
       currentTurn = 0;
       saveGame();
       renderCharacters();
+      updateRemoteCharacters();
     });
 
     row.appendChild(div);
@@ -257,6 +258,7 @@ function addCharacter() {
 
       saveGame();
       renderCharacters();
+      updateRemoteCharacters();
 
       // Clear inputs
       nameInput.value = "";
@@ -337,6 +339,7 @@ function loadFromFile(event) {
 
       saveGame();       // optional: sync to localStorage
       renderCharacters();
+      updateRemoteCharacters(); // update remote control
     } catch (e) {
       alert("Failed to load save file.");
     }
@@ -358,6 +361,7 @@ function resetTracker() {
   currentTurn = 0;
   localStorage.removeItem("initiativeTrackerSave"); // clear saved game
   renderCharacters(); // update the UI
+  updateRemoteCharacters(); // update remote control
 }
 
 loadGame();
@@ -601,21 +605,109 @@ function openRemoteControl() {
         .btn:hover {
           background: rgba(102, 102, 102, 0.9);
         }
+        .character-row {
+          display: flex;
+          gap: 8px;
+          margin: 15px 0;
+          padding: 10px;
+          background: rgba(0, 0, 0, 0.6);
+          border-radius: 8px;
+          overflow-x: auto;
+        }
+        .character {
+          flex: 0 0 60px;
+          text-align: center;
+          cursor: move;
+          padding: 8px;
+          border-radius: 6px;
+          background: rgba(68, 68, 68, 0.8);
+          transition: background 0.2s, transform 0.2s;
+        }
+        .character:hover {
+          background: rgba(102, 102, 102, 0.9);
+          transform: scale(1.05);
+        }
+        .character.active {
+          background: rgba(255, 215, 0, 0.8);
+          border: 2px solid gold;
+        }
+        .character img {
+          width: 100%;
+          height: 60px;
+          object-fit: cover;
+          border-radius: 4px;
+          margin-bottom: 5px;
+        }
+        .character-name {
+          font-size: 12px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       </style>
     </head>
     <body>
       <div class="container">
         <h2>DM Remote Control</h2>
+        
+        <div class="character-row" id="characterRow">
+          <!-- Character mirror will appear here -->
+        </div>
+        
         <button class="btn" onclick="sendCommand('nextTurn')">Next Turn</button>
         <button class="btn" onclick="sendCommand('toggleMute')">Toggle Sound</button>
         <button class="btn" onclick="window.close()">Close Remote</button>
       </div>
       <script>
-        function sendCommand(command) {
+        let characters = [];
+        let currentTurn = 0;
+        let draggedIndex = null;
+
+        function sendCommand(command, data = {}) {
           if (opener) {
-            opener.postMessage({ command: command }, '*');
+            opener.postMessage({ command: command, data: data }, '*');
           }
         }
+
+        function updateCharacterRow() {
+          const row = document.getElementById('characterRow');
+          row.innerHTML = '';
+
+          characters.forEach((character, index) => {
+            const div = document.createElement('div');
+            div.className = 'character';
+            if (index === currentTurn) div.classList.add('active');
+            div.draggable = true;
+
+            div.innerHTML = `
+              <img src="${character.image}" alt="${character.name}">
+              <div class="character-name">${character.name}</div>
+            `;
+
+            // Drag & drop
+            div.addEventListener('dragstart', () => draggedIndex = index);
+            div.addEventListener('dragover', (event) => event.preventDefault());
+            div.addEventListener('drop', () => {
+              if (draggedIndex === null || draggedIndex === index) return;
+              sendCommand('reorderCharacters', { from: draggedIndex, to: index });
+              draggedIndex = null;
+            });
+
+            row.appendChild(div);
+          });
+        }
+
+        // Receive character data from main window
+        window.addEventListener('message', function(event) {
+          if (event.data.type === 'characterUpdate') {
+            characters = event.data.characters;
+            currentTurn = event.data.currentTurn;
+            updateCharacterRow();
+          }
+        });
+
+        // Request initial character data
+        sendCommand('getCharacters');
 
         // Make window draggable
         let isDragging = false;
@@ -743,10 +835,38 @@ window.addEventListener('message', function(event) {
     switch (event.data.command) {
       case 'nextTurn':
         nextTurn();
+        updateRemoteCharacters();
         break;
       case 'toggleMute':
         toggleMute();
         break;
+      case 'getCharacters':
+        updateRemoteCharacters();
+        break;
+      case 'reorderCharacters':
+        if (event.data.data && event.data.data.from !== undefined && event.data.data.to !== undefined) {
+          const { from, to } = event.data.data;
+          if (from >= 0 && from < characters.length && to >= 0 && to < characters.length) {
+            const moved = characters.splice(from, 1)[0];
+            characters.splice(to, 0, moved);
+            currentTurn = 0;
+            saveGame();
+            renderCharacters();
+            updateRemoteCharacters();
+          }
+        }
+        break;
     }
   }
 });
+
+// Update remote control with current characters
+function updateRemoteCharacters() {
+  if (remoteWindow && !remoteWindow.closed) {
+    remoteWindow.postMessage({
+      type: 'characterUpdate',
+      characters: characters,
+      currentTurn: currentTurn
+    }, '*');
+  }
+}
