@@ -106,6 +106,7 @@ body.theme-fey {
   top: 15px;
   left: 15px;
   z-index: 1000;
+  display: inline-block;
 }
 
 #themeToggle {
@@ -128,7 +129,7 @@ body.theme-fey {
   margin-top: 0px;
   top: 100%;
   left: 0;
-  z-index: 1000;
+  z-index: 10000;
   background-color: rgba(0, 0, 0, 0.243);
   border: 1px solid #555;
   border-radius: 8px;
@@ -648,8 +649,8 @@ body.fullscreen .tavern-btn {
 
 .theme-selector .tooltip-text {
   position: absolute;
-  top: 150%;
-  left: 100%;
+  top: 50%;
+  left: 125%;
   transform: translateY(-50%);
   margin-left: 8px;
 
@@ -661,9 +662,9 @@ body.fullscreen .tavern-btn {
   border-radius: 6px;
   font-size: 14px;
 
-  display: flex;             /* ✅ make container flex */
-  align-items: center;       /* ✅ vertically center text */
-  justify-content: center;   /* horizontally center (optional) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   z-index: 2000;
 
@@ -675,8 +676,20 @@ body.fullscreen .tavern-btn {
 }
 
 .theme-selector:hover .tooltip-text {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.theme-selector:hover #themeTooltip {
   opacity: 1;
   visibility: visible;
+}
+
+#themeTooltip {
+  white-space: nowrap;
+  display: inline-block;
+  box-sizing: border-box;
+  pointer-events: none;
 }
 
 .custom-bg-wrapper {
@@ -709,9 +722,9 @@ body.fullscreen .tavern-btn {
 </head>
 <body class="theme-default" tabindex="0">
 
-<div class="theme-selector tooltip-wrapper">
+<div class="theme-selector">
   <button id="themeToggle">Theme ▾</button>
-  <span class="tooltip-text">Press T to Toggle Theme</span>
+  <div id="themeTooltip" class="fixed-tooltip" style="top: 3px; left: 108px; width: fit-content; max-width: 200px;">Press T to Toggle Theme</div>
 
   <div class="theme-menu" id="themeMenu">
     <button onclick="setTheme('default')">Default</button>
@@ -769,6 +782,7 @@ body.fullscreen .tavern-btn {
 
 <div class="tooltip-wrapper" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;">
   <button id="remoteBtn" class="mute-btn">📱 Remote</button>
+  <span class="tooltip-text" style="bottom: 50%; left: 125%; transform: translateY(50%);">Press R to Open Remote</span>
 </div>
 
 <!-- Tavern button -->

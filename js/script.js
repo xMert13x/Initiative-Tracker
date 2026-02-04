@@ -4,6 +4,21 @@ let characters = [];
 let currentTurn = 0;
 let draggedIndex = null;
 
+// Initialize sound variables at the very top to avoid initialization errors
+let soundMuted = localStorage.getItem("soundMuted") === "true";
+let turnSound;
+try {
+  turnSound = new Audio("sounds/turn.mp3");
+  turnSound.volume = 0.1;
+  turnSound.preload = "auto";
+} catch (error) {
+  // Create a dummy sound object to prevent errors
+  turnSound = {
+    currentTime: 0,
+    play: () => Promise.resolve()
+  };
+}
+
 const row = document.getElementById("characterRow");
 
 function saveGame() {
@@ -57,6 +72,91 @@ function renderCharacters() {
 
   if (currentTurn >= characters.length) currentTurn = 0;
 
+  // Check if we're in the remote window
+  const isRemote = window.location.pathname.includes('remote.html');
+
+  if (isRemote) {
+    // Fixed thumbnail size for remote window
+    const characterWidth = 35;
+    const characterHeight = 35;
+    const nameFontSize = 7;
+
+    characters.forEach((character, index) => {
+      const div = document.createElement("div");
+      div.className = "character";
+      if (index === currentTurn) div.classList.add("active");
+      div.draggable = true;
+
+      div.innerHTML = `
+        <div style="width:${characterWidth}px; height:${characterHeight}px; overflow:hidden;">
+          <img src="${character.image}" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <p style="font-size:${nameFontSize}px; margin:2px 0 0;">
+          <strong>${character.name}</strong>
+        </p>
+      `;
+
+      // Drag & drop
+      div.addEventListener("dragstart", () => draggedIndex = index);
+      div.addEventListener("dragover", (event) => event.preventDefault());
+      div.addEventListener("drop", () => {
+        if (draggedIndex === null || draggedIndex === index) return;
+        
+        const activeCharacter = currentTurn < characters.length ? characters[currentTurn] : null;
+        
+        const moved = characters.splice(draggedIndex, 1)[0];
+        characters.splice(index, 0, moved);
+        draggedIndex = null;
+        
+        if (activeCharacter) {
+          const newIndex = characters.findIndex(c => c.name === activeCharacter.name && c.image === activeCharacter.image);
+          if (newIndex !== -1) {
+            currentTurn = newIndex;
+          }
+        }
+        
+        saveGame();
+        renderCharacters();
+      });
+
+      // Delete button
+      const deleteTab = document.createElement('div');
+      deleteTab.className = 'delete-tab';
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      
+      const skullSpan = document.createElement('span');
+      skullSpan.className = 'skull';
+      skullSpan.textContent = 'X';
+      
+      deleteBtn.appendChild(skullSpan);
+      deleteTab.appendChild(deleteBtn);
+      div.appendChild(deleteTab);
+      
+      deleteBtn.addEventListener('click', () => {
+        characters.splice(index, 1);
+        
+        if (index === currentTurn) {
+          if (currentTurn >= characters.length) {
+            currentTurn = 0;
+          }
+        } else if (index < currentTurn) {
+          currentTurn--;
+        }
+        
+        saveGame();
+        renderCharacters();
+      });
+
+      row.appendChild(div);
+    });
+
+    updateActiveCharacter();
+    return;
+  }
+
+  // Regular rendering for main window
 const GAP = 10;                 // visual gap between cards
 const MAX_CHARACTER_WIDTH = 250;
 const MIN_CHARACTER_WIDTH = 130;
@@ -127,10 +227,20 @@ const nameFontSize = getNameFontSize(characters.length);
     div.addEventListener("dragover", (event) => event.preventDefault());
     div.addEventListener("drop", () => {
       if (draggedIndex === null || draggedIndex === index) return;
+      
+      const activeCharacter = currentTurn < characters.length ? characters[currentTurn] : null;
+      
       const moved = characters.splice(draggedIndex, 1)[0];
       characters.splice(index, 0, moved);
       draggedIndex = null;
-      currentTurn = 0;
+      
+      if (activeCharacter) {
+        const newIndex = characters.findIndex(c => c.name === activeCharacter.name && c.image === activeCharacter.image);
+        if (newIndex !== -1) {
+          currentTurn = newIndex;
+        }
+      }
+      
       saveGame();
       renderCharacters();
       
@@ -164,10 +274,17 @@ const nameFontSize = getNameFontSize(characters.length);
     // Delete button
     div.querySelector(".delete-btn").addEventListener("click", () => {
       characters.splice(index, 1);
-      currentTurn = 0;
+      
+      if (index === currentTurn) {
+        if (currentTurn >= characters.length) {
+          currentTurn = 0;
+        }
+      } else if (index < currentTurn) {
+        currentTurn--;
+      }
+      
       saveGame();
       renderCharacters();
-      updateRemoteCharacters();
     });
 
     row.appendChild(div);
@@ -254,15 +371,18 @@ function addCharacter() {
         image: resizedData
       });
 
-      currentTurn = 0;
-
       saveGame();
       renderCharacters();
-      updateRemoteCharacters();
 
-      // Clear inputs
+      // Clear inputs and hide dialog if it exists
       nameInput.value = "";
       imageInput.value = "";
+      
+      // Hide add character dialog if it exists (for remote)
+      const addCharDialog = document.getElementById('addCharDialog');
+      if (addCharDialog) {
+        addCharDialog.style.display = 'none';
+      }
     };
 
     img.src = reader.result;
@@ -339,7 +459,6 @@ function loadFromFile(event) {
 
       saveGame();       // optional: sync to localStorage
       renderCharacters();
-      updateRemoteCharacters(); // update remote control
     } catch (e) {
       alert("Failed to load save file.");
     }
@@ -361,7 +480,6 @@ function resetTracker() {
   currentTurn = 0;
   localStorage.removeItem("initiativeTrackerSave"); // clear saved game
   renderCharacters(); // update the UI
-  updateRemoteCharacters(); // update remote control
 }
 
 loadGame();
@@ -371,10 +489,12 @@ renderCharacters();
 const themeToggle = document.getElementById("themeToggle");
 const themeMenu = document.getElementById("themeMenu");
 
-themeToggle.addEventListener("click", () => {
-  themeMenu.style.display =
-    themeMenu.style.display === "block" ? "none" : "block";
-});
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    themeMenu.style.display =
+      themeMenu.style.display === "block" ? "none" : "block";
+  });
+}
 
 function setTheme(theme) {
   activeTheme = theme;
@@ -398,7 +518,7 @@ function setTheme(theme) {
   }
 
   themeMenu.style.display = "none";
-  enforceFullscreenUIState();
+  // enforceFullscreenUIState(); // Removed - function not needed
 }
 
 const customBgBtn = document.getElementById("customBgBtn");
@@ -498,21 +618,6 @@ function playTurnSound() {
   }
 }
 
-let turnSound;
-try {
-  turnSound = new Audio("sounds/turn.mp3");
-  turnSound.volume = 0.1;
-  turnSound.preload = "auto";
-} catch (error) {
-  // Create a dummy sound object to prevent errors
-  turnSound = {
-    currentTime: 0,
-    play: () => Promise.resolve()
-  };
-}
-
-let soundMuted = localStorage.getItem("soundMuted") === "true";
-
 function toggleMute() {
   soundMuted = !soundMuted;
   localStorage.setItem("soundMuted", soundMuted);
@@ -524,7 +629,16 @@ function updateMuteButton() {
   const btn = document.getElementById("muteBtn");
   if (!btn) return;
 
-  btn.textContent = soundMuted ? "🔇" : "🔊 ";
+  // Check if we're in the remote window
+  const isRemote = window.location.pathname.includes('remote.html');
+  
+  if (isRemote) {
+    // Remote window: always show "Toggle Sound"
+    btn.textContent = "Toggle Sound";
+  } else {
+    // Main window: show speaker emojis
+    btn.textContent = soundMuted ? "🔇" : "🔊";
+  }
 }
 
 const muteBtn = document.getElementById("muteBtn");
@@ -534,232 +648,16 @@ if (muteBtn) {
 
 const remoteBtn = document.getElementById("remoteBtn");
 if (remoteBtn) {
-  remoteBtn.addEventListener("click", openRemoteControl);
+  remoteBtn.addEventListener("click", () => {
+    window.open(
+      "remote.html",
+      "DMRremote",
+      "width=480,height=350,top=100,left=100,menubar=no,toolbar=no,location=no,scrollbars=no,resizable=0,minimizable=yes,maximizable=0"
+    );
+  });
 }
 
 updateMuteButton();
-
-let remoteWindow = null;
-
-function openRemoteControl() {
-  if (remoteWindow && !remoteWindow.closed) {
-    remoteWindow.focus();
-    return;
-  }
-
-  // Create remote control window with snug dimensions and locked resizing
-  remoteWindow = window.open(
-    "",
-    "DMRremote",
-    "width=280,height=240,top=100,left=100,menubar=no,toolbar=no,location=no,scrollbars=no,resizable=no"
-  );
-
-  if (!remoteWindow) {
-    alert("Please allow pop-ups for this site to use the remote control.");
-    return;
-  }
-
-  // Set remote background to solid black
-  let remoteBackground = "#000000"; // solid black
-
-  // Write remote control HTML
-  remoteWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>DM Remote Control</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap');
-        body {
-          font-family: Arial, sans-serif;
-          background: ${remoteBackground};
-          background-size: cover;
-          background-position: center;
-          color: white;
-          margin: 0;
-          padding: 15px;
-        }
-        .container {
-          text-align: center;
-        }
-        h2 {
-          font-family: 'Uncial Antiqua', cursive;
-          color: #ffd700;
-          margin-top: 0;
-          margin-bottom: 10px;
-        }
-        .btn {
-          display: block;
-          width: 100%;
-          margin: 8px 0;
-          padding: 12px;
-          font-size: 15px;
-          border: none;
-          border-radius: 8px;
-          background: rgba(68, 68, 68, 0.8);
-          backdrop-filter: blur(4px);
-          color: white;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .btn:hover {
-          background: rgba(102, 102, 102, 0.9);
-        }
-        .character-row {
-          display: flex;
-          gap: 8px;
-          margin: 15px 0;
-          padding: 10px;
-          background: rgba(0, 0, 0, 0.6);
-          border-radius: 8px;
-          overflow-x: auto;
-        }
-        .character {
-          flex: 0 0 60px;
-          text-align: center;
-          cursor: move;
-          padding: 8px;
-          border-radius: 6px;
-          background: rgba(68, 68, 68, 0.8);
-          transition: background 0.2s, transform 0.2s;
-        }
-        .character:hover {
-          background: rgba(102, 102, 102, 0.9);
-          transform: scale(1.05);
-        }
-        .character.active {
-          background: rgba(255, 215, 0, 0.8);
-          border: 2px solid gold;
-        }
-        .character img {
-          width: 100%;
-          height: 60px;
-          object-fit: cover;
-          border-radius: 4px;
-          margin-bottom: 5px;
-        }
-        .character-name {
-          font-size: 12px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h2>DM Remote Control</h2>
-        
-        <div class="character-row" id="characterRow">
-          <!-- Character mirror will appear here -->
-        </div>
-        
-        <button class="btn" onclick="sendCommand('nextTurn')">Next Turn</button>
-        <button class="btn" onclick="sendCommand('toggleMute')">Toggle Sound</button>
-        <button class="btn" onclick="window.close()">Close Remote</button>
-      </div>
-      <script>
-        let characters = [];
-        let currentTurn = 0;
-        let draggedIndex = null;
-
-        function sendCommand(command, data = {}) {
-          if (opener) {
-            opener.postMessage({ command: command, data: data }, '*');
-          }
-        }
-
-        function updateCharacterRow() {
-          const row = document.getElementById('characterRow');
-          row.innerHTML = '';
-
-          characters.forEach((character, index) => {
-            const div = document.createElement('div');
-            div.className = 'character';
-            if (index === currentTurn) div.classList.add('active');
-            div.draggable = true;
-
-            div.innerHTML = `
-              <img src="${character.image}" alt="${character.name}">
-              <div class="character-name">${character.name}</div>
-            `;
-
-            // Drag & drop
-            div.addEventListener('dragstart', () => draggedIndex = index);
-            div.addEventListener('dragover', (event) => event.preventDefault());
-            div.addEventListener('drop', () => {
-              if (draggedIndex === null || draggedIndex === index) return;
-              sendCommand('reorderCharacters', { from: draggedIndex, to: index });
-              draggedIndex = null;
-            });
-
-            row.appendChild(div);
-          });
-        }
-
-        // Receive character data from main window
-        window.addEventListener('message', function(event) {
-          if (event.data.type === 'characterUpdate') {
-            characters = event.data.characters;
-            currentTurn = event.data.currentTurn;
-            updateCharacterRow();
-          }
-        });
-
-        // Request initial character data
-        sendCommand('getCharacters');
-
-        // Make window draggable
-        let isDragging = false;
-        let startX, startY, startLeft, startTop;
-
-        document.addEventListener('mousedown', function(e) {
-          if (e.target === document.body || e.target.classList.contains('container')) {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startLeft = window.screenLeft;
-            startTop = window.screenTop;
-          }
-        });
-
-        document.addEventListener('mousemove', function(e) {
-          if (isDragging) {
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            window.moveTo(startLeft + dx, startTop + dy);
-          }
-        });
-
-        document.addEventListener('mouseup', function() {
-          isDragging = false;
-        });
-      <\/script>
-    </body>
-    </html>
-  `);
-
-  remoteWindow.document.close();
-
-  // Set up resize and close handlers using modern pagehide event
-  remoteWindow.addEventListener('pagehide', function() {
-    remoteWindow = null;
-  });
-  
-  // Fallback for older browsers
-  remoteWindow.addEventListener('unload', function() {
-    remoteWindow = null;
-  });
-}
-
-// Make functions accessible to remote window
-window.nextTurn = nextTurn;
-window.toggleFullscreen = toggleFullscreen;
-window.toggleMute = toggleMute;
-window.resetTracker = resetTracker;
-window.saveToFile = saveToFile;
-window.characters = characters;
-window.currentTurn = currentTurn;
 const CURSOR_HIDE_DELAY = 1000; // 1 second
 let cursorTimeout = null;
 
@@ -805,17 +703,42 @@ document.addEventListener("fullscreenchange", () => {
   }
 });
 
-document.getElementById("nextTurnBtn").addEventListener("click", nextTurn);
-document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
-document.getElementById("resetBtn").addEventListener("click", resetTracker);
-document.getElementById("saveBtn").addEventListener("click", saveToFile);
+// Add event listeners with null checks
+const nextTurnBtn = document.getElementById("nextTurnBtn");
+if (nextTurnBtn) {
+  nextTurnBtn.addEventListener("click", nextTurn);
+}
 
-document.getElementById("loadBtn").addEventListener("click", () => {
-  document.getElementById("loadFileInput").click();
-});
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener("click", toggleFullscreen);
+}
+
+const resetBtn = document.getElementById("resetBtn");
+if (resetBtn) {
+  resetBtn.addEventListener("click", resetTracker);
+}
+
+const saveBtn = document.getElementById("saveBtn");
+if (saveBtn) {
+  saveBtn.addEventListener("click", saveToFile);
+}
+
+const loadBtn = document.getElementById("loadBtn");
+if (loadBtn) {
+  loadBtn.addEventListener("click", () => {
+    const loadFileInput = document.getElementById("loadFileInput");
+    if (loadFileInput) {
+      loadFileInput.click();
+    }
+  });
+}
 
 // Add click event listener to hidden fullscreen trigger
-document.getElementById("fullscreenTrigger").addEventListener("click", toggleFullscreen);
+const fullscreenTrigger = document.getElementById("fullscreenTrigger");
+if (fullscreenTrigger) {
+  fullscreenTrigger.addEventListener("click", toggleFullscreen);
+}
 
 document.addEventListener("keydown", (event) => {
   const tag = event.target.tagName;
@@ -827,46 +750,24 @@ document.addEventListener("keydown", (event) => {
   if (key === "t") toggleThemeByKey();
   if (key === "m") toggleMute();
   if (key === "f") toggleFullscreen();
-});
-
-// Handle messages from remote control
-window.addEventListener('message', function(event) {
-  if (event.data && event.data.command) {
-    switch (event.data.command) {
-      case 'nextTurn':
-        nextTurn();
-        updateRemoteCharacters();
-        break;
-      case 'toggleMute':
-        toggleMute();
-        break;
-      case 'getCharacters':
-        updateRemoteCharacters();
-        break;
-      case 'reorderCharacters':
-        if (event.data.data && event.data.data.from !== undefined && event.data.data.to !== undefined) {
-          const { from, to } = event.data.data;
-          if (from >= 0 && from < characters.length && to >= 0 && to < characters.length) {
-            const moved = characters.splice(from, 1)[0];
-            characters.splice(to, 0, moved);
-            currentTurn = 0;
-            saveGame();
-            renderCharacters();
-            updateRemoteCharacters();
-          }
-        }
-        break;
-    }
+  if (key === "r") {
+    const remoteBtn = document.getElementById("remoteBtn");
+    if (remoteBtn) remoteBtn.click();
   }
 });
 
-// Update remote control with current characters
-function updateRemoteCharacters() {
-  if (remoteWindow && !remoteWindow.closed) {
-    remoteWindow.postMessage({
-      type: 'characterUpdate',
-      characters: characters,
-      currentTurn: currentTurn
-    }, '*');
+// Listen for storage changes from other tabs/windows (for remote.html synchronization)
+window.addEventListener('storage', function(event) {
+  if (event.key === 'initiativeTrackerSave') {
+    loadGame();
+    renderCharacters();
   }
-}
+  if (event.key === 'initiativeTheme') {
+    loadTheme();
+  }
+  if (event.key === 'soundMuted') {
+    soundMuted = localStorage.getItem('soundMuted') === 'true';
+    updateMuteButton();
+  }
+});
+
