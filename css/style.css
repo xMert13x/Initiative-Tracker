@@ -441,9 +441,7 @@ h1,
 
 .theme-selector,
 .mute-btn,
-#custom-bg-wrapper,
-#customBgInput,
-#clearCustomBgBtn {
+#customBgInput {
   transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
 }
 
@@ -454,9 +452,7 @@ body.fullscreen .add-character {
 
 body.fullscreen .theme-selector,
 body.fullscreen .mute-btn,
-body.fullscreen #custom-bg-wrapper,
-body.fullscreen #customBgInput,
-body.fullscreen #clearCustomBgBtn {
+body.fullscreen #customBgInput {
   transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
 }
 
@@ -667,25 +663,4 @@ body.fullscreen .tavern-btn {
   visibility: visible;
 }
 
-.custom-bg-wrapper {
-  position: fixed;
-  top: 15px;    /* just below theme button */
-  left: 110px;
-  z-index: 1000;
-  display: flex;
-  gap: 5px;
-}
 
-.custom-bg-wrapper input,
-.custom-bg-wrapper button {
-  padding: 6px 10px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background-color: #222;
-  color: white;
-  cursor: pointer;
-}
-.custom-bg-wrapper button:hover {
-  background-color: #444;
-}
