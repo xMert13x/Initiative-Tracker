@@ -565,7 +565,7 @@ function openRemoteControl() {
     <head>
       <title>DM Remote Control</title>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Uncial Antiqua&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap');
         body {
           font-family: Arial, sans-serif;
           background: ${remoteBackground};
