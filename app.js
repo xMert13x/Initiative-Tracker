@@ -15,6 +15,7 @@ const state = {
   lairActionActive: false,
   lairActionPassed: false,
   legendaryActive: false,
+  soundMuted: false,
 };
 
 /* ==========================================================================
@@ -27,6 +28,7 @@ const dom = {
   roundNumber: document.getElementById('round-number'),
   positionDisplay: document.getElementById('position-display'),
   fullscreenBtn: document.getElementById('fullscreen-btn'),
+  soundBtn: document.getElementById('sound-btn'),
   settingsBtn: document.getElementById('settings-btn'),
   overlay: document.getElementById('overlay'),
   addDrawer: document.getElementById('add-drawer'),
@@ -524,11 +526,25 @@ const sounds = {
 let nextSoundIsSword = true;
 
 function playSound(name) {
+  if (state.soundMuted) return;
   const s = sounds[name];
   if (!s) return;
   s.currentTime = 0;
   // .catch: browsers may block audio until the page has had user interaction
   s.play().catch(() => {});
+}
+
+function setSoundMuted(muted) {
+  state.soundMuted = !!muted;
+  updateSoundBtn();
+  saveState();
+  notifyRemote();
+  showToast(state.soundMuted ? 'Sound muted' : 'Sound on');
+}
+
+function updateSoundBtn() {
+  dom.soundBtn.innerHTML = state.soundMuted ? '&#128263;' : '&#128266;';
+  dom.soundBtn.title = state.soundMuted ? 'Unmute sound (M)' : 'Mute sound (M)';
 }
 
 /* ==========================================================================
@@ -886,6 +902,8 @@ function showToast(msg) {
 function wireEvents() {
   // Fullscreen
   dom.fullscreenBtn.addEventListener('click', toggleFullscreen);
+  dom.soundBtn.addEventListener('click', () => setSoundMuted(!state.soundMuted));
+  updateSoundBtn();
 
   // Remote
   dom.settingsBtn.addEventListener('click', () => {
@@ -1000,7 +1018,7 @@ function wireEvents() {
 
   // Keyboard shortcuts (same as the DM remote)
   // Space/→ = Next, ← = Previous, Enter = Start Combat, K = Lair,
-  // L = Legendary, F = Fullscreen, Esc = Close drawers / exit fullscreen
+  // L = Legendary, F = Fullscreen, M = Mute, Esc = Close drawers / exit fullscreen
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const t = e.target;
@@ -1043,6 +1061,11 @@ function wireEvents() {
         e.preventDefault();
         toggleFullscreen();
         break;
+      case 'm':
+      case 'M':
+        e.preventDefault();
+        setSoundMuted(!state.soundMuted);
+        break;
       case 'Escape':
         if (document.fullscreenElement) {
           document.exitFullscreen();
@@ -1084,6 +1107,7 @@ window.RFI = {
       lairActionActive: state.lairActionActive,
       lairActionPending: isLairActionPending(),
       legendaryActive: state.legendaryActive,
+      soundMuted: state.soundMuted,
       fullscreen: !!document.fullscreenElement,
     };
   },
@@ -1093,6 +1117,10 @@ window.RFI = {
       return document.documentElement.requestFullscreen().then(() => true);
     }
     return document.exitFullscreen().then(() => false);
+  },
+
+  setSoundMuted(muted) {
+    setSoundMuted(muted);
   },
 
   addCharacter(name, initiative, image) {

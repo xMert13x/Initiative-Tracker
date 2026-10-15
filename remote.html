@@ -955,7 +955,7 @@
 
     // --- Keyboard shortcuts ---
     // Space = Next, Left = Previous, Enter = Start Combat, K = Lair,
-    // L = Legendary, F = Fullscreen (controls the projected tracker page)
+    // L = Legendary, F = Fullscreen, M = Mute (controls the projected tracker page)
     document.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const t = e.target;
@@ -966,6 +966,13 @@
           t.type !== 'color' && t.type !== 'file') return;
 
       const key = e.key;
+      if ((key === 'm' || key === 'M') && rfi) {
+        e.preventDefault();
+        const muted = !rfi.getSnapshot().soundMuted;
+        rfi.setSoundMuted(muted);
+        toast(muted ? 'Sound muted' : 'Sound on');
+        return;
+      }
       let btnId = null;
       if (key === ' ') btnId = 'next-btn';
       else if (key === 'ArrowLeft') btnId = 'prev-btn';
