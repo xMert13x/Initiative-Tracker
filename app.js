@@ -515,23 +515,58 @@ function updatePositionDisplay() {
 }
 
 /* ==========================================================================
-   Sound Effects
+   Sound Effects — Web Audio API (pre-decoded, zero-latency)
    ========================================================================== */
-const sounds = {
-  sword: new Audio(encodeURI('Sound Effects/Next Sword Impact.mp3')),
-  spell: new Audio(encodeURI('Sound Effects/Next Spell Effect.mp3')),
-  lair: new Audio(encodeURI('Sound Effects/Lair Action.mp3')),
-  legendary: new Audio(encodeURI('Sound Effects/Legendary Action.mp3')),
+const SOUND_URLS = {
+  sword:     encodeURI('Sound Effects/Next Sword Impact.mp3'),
+  spell:     encodeURI('Sound Effects/Next Spell Effect.mp3'),
+  lair:      encodeURI('Sound Effects/Lair Action.mp3'),
+  legendary: encodeURI('Sound Effects/Legendary Action.mp3'),
 };
+
+let audioCtx = null;
+const audioBuffers = {};
+
+function initAudio() {
+  if (audioCtx) return audioCtx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  audioCtx = new AC();
+  return audioCtx;
+}
+
+// Pre-decode all sounds into AudioBuffers when page loads
+async function preloadSounds() {
+  initAudio();
+  if (!audioCtx) return;
+  for (const [name, url] of Object.entries(SOUND_URLS)) {
+    try {
+      const res = await fetch(url);
+      const data = await res.arrayBuffer();
+      audioBuffers[name] = await audioCtx.decodeAudioData(data);
+    } catch (err) {
+      console.warn('Failed to preload sound:', name, err);
+    }
+  }
+}
+
 let nextSoundIsSword = true;
 
 function playSound(name) {
   if (state.soundMuted) return;
-  const s = sounds[name];
-  if (!s) return;
-  s.currentTime = 0;
-  // .catch: browsers may block audio until the page has had user interaction
-  s.play().catch(() => {});
+  initAudio();
+  if (!audioCtx) return;
+
+  // Resume on first user gesture (browser autoplay policy)
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  const buf = audioBuffers[name];
+  if (!buf) return;
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(0);  // near-zero latency — plays from pre-decoded PCM in RAM
 }
 
 function setSoundMuted(muted) {
@@ -1277,6 +1312,7 @@ function notifyRemote() {
    Init
    ========================================================================== */
 function init() {
+  preloadSounds();   // decode all MP3s to memory on page load
   loadState();
   applyBackground();
   wireEvents();
