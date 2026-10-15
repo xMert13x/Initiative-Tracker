@@ -398,8 +398,7 @@ function renderCarousel() {
 
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.innerHTML =
-      '<span class="empty-icon">&#127922;</span>No characters yet.<br>Click "Add Character" to begin.';
+    empty.innerHTML = 'Open the DM remote to add characters.';
     stage.appendChild(empty);
 
     updatePositionDisplay();

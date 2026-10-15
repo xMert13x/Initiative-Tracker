@@ -434,13 +434,6 @@ body {
   white-space: nowrap;
 }
 
-.empty-state .empty-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 16px;
-  opacity: 0.4;
-}
-
 /* ===== Overlay & Drawers ===== */
 .overlay {
   position: fixed;
