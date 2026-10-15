@@ -10,7 +10,7 @@ const state = {
   characters: [],      // [{ id, name, initiative, image }]
   activeIndex: 0,
   round: 1,
-  bgColor: '#1a1a2e',
+  bgColor: '#000000',
   bgImage: null,
   lairActionActive: false,
   lairActionPassed: false,
@@ -77,6 +77,8 @@ function loadState() {
     if (!raw) return;
     const data = JSON.parse(raw);
     Object.assign(state, data);
+    // One-time migration: the old navy default is now black
+    if (state.bgColor === '#1a1a2e') state.bgColor = '#000000';
     state.lairActionActive = !!state.lairActionActive;
     state.lairActionPassed = !!state.lairActionPassed;
     state.legendaryActive = !!state.legendaryActive;
