@@ -544,7 +544,7 @@ function setSoundMuted(muted) {
 
 function updateSoundBtn() {
   dom.soundBtn.innerHTML = state.soundMuted ? '&#128263;' : '&#128266;';
-  dom.soundBtn.title = state.soundMuted ? 'Unmute sound (M)' : 'Mute sound (M)';
+  dom.soundBtn.dataset.tip = state.soundMuted ? 'Unmute — M' : 'Mute — M';
 }
 
 /* ==========================================================================

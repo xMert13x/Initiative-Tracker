@@ -159,6 +159,26 @@ body {
   transform: scale(0.96);
 }
 
+/* Instant hotkey tooltip — same style as the DM remote's data-tip prompts */
+.controls .btn[data-tip] { position: relative; }
+.controls .btn[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: rgba(20, 20, 30, 0.95);
+  color: #fff;
+  font-family: 'Alegreya', Georgia, serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--accent-dim);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #ffd700, #ffa500);
   color: #1a1a2e;
