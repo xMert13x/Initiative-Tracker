@@ -1,271 +1,1005 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
-  <title>DM Remote Control</title>
-<link rel="icon" href="images/favicon.ico?v=2">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DM Remote</title>
+  <link rel="preload" href="fonts/cinzel-900.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/cinzel.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/alegreya.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/alegreya-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" type="image/png" href="Icon.png">
   <style>
-    * {
-      box-sizing: border-box;
+    @font-face {
+      font-family: 'Cinzel';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('fonts/cinzel.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Cinzel';
+      font-style: normal;
+      font-weight: 900;
+      font-display: swap;
+      src: url('fonts/cinzel-900.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Alegreya';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('fonts/alegreya.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Alegreya';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('fonts/alegreya-700.woff2') format('woff2');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #16213e;
+      --panel: #1a1a2e;
+      --text: #e8e8e8;
+      --text-dim: #888;
+      --accent: #ffd700;
+      --accent-dim: rgba(255, 215, 0, 0.15);
+      --border: rgba(255, 255, 255, 0.1);
+      --danger: #e94560;
+      --btn-bg: rgba(30, 30, 30, 0.75);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #000000;
-      color: white;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-
-    .container {
-      text-align: center;
-      width: fit-content;
-      margin: 0 auto;
-      padding: 10px;
-    }
-
-    h2 {
-      font-family: 'Uncial Antiqua', cursive;
-      color: #ffd700;
-      margin-top: 0;
-      margin-bottom: 6px;
-      font-size: 16px;
-    }
-
-    .btn {
-      display: block;
-      width: 100%;
-      margin: 4px 0;
-      padding: 6px 10px;
-      font-size: clamp(10px, 2vw, 13px);
-      border: none;
-      border-radius: 6px;
-      background: rgba(68, 68, 68, 0.8);
-      backdrop-filter: blur(4px);
-      color: white;
-      cursor: pointer;
-      transition: background 0.2s;
-      box-sizing: border-box;
-    }
-
-    .character-row {
+      font-family: 'Alegreya', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
-      gap: 4px;
-      margin: 6px 0;
-      padding: 6px;
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid rgba(255, 215, 0, 0.3);
-      border-radius: 6px;
-      min-height: 50px;
-      white-space: nowrap;
-      justify-content: center;
-      width: 460px;
+      align-items: center;
+      padding: 0 8px;
+      gap: 8px;
     }
 
-    .controls {
+    /* --- Left: Add character group --- */
+    .add-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 56px;
+      height: 56px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.2s;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:hover { background: rgba(60, 60, 60, 0.85); border-color: var(--accent); }
+    .icon-btn:active { transform: scale(0.96); }
+
+    .icon-btn.add {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      color: #1a1a2e;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .combat-info {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      margin: 6px 0 0;
-      width: 100%;
+      align-items: center;
     }
 
-    .character {
-      flex: 0 0 35px;
+    .round-counter {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--accent-dim);
+      border-radius: 6px;
+      background: var(--btn-bg);
+      color: var(--accent);
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      cursor: move;
-      padding: 3px;
-      border-radius: 3px;
-      background: rgba(68, 68, 68, 0.8);
-      transition: background 0.2s, transform 0.2s;
-      display: inline-block;
+      transition: border-color 0.2s, font-size 0.2s;
     }
-
-    .character:hover {
-      background: rgba(102, 102, 102, 0.9);
-      transform: scale(1.1);
+    .round-counter.double-digit {
+      font-size: 0.85rem;
     }
+    .round-counter:hover { border-color: var(--accent); }
 
-    .character.active {
-      background: rgba(255, 215, 0, 0.8);
-      border: 1px solid gold;
-      box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
-    }
-
-    .character img {
+    .icon-btn img {
       width: 100%;
-      height: 35px;
+      height: 100%;
       object-fit: cover;
-      border-radius: 2px;
-      margin-bottom: 2px;
     }
 
-    .character-name {
-      font-size: 7px;
+    .icon-btn .badge {
+      position: absolute;
+      bottom: 1px;
+      right: 3px;
+      font-size: 0.55rem;
+      background: rgba(0,0,0,0.7);
+      color: var(--accent);
+      border-radius: 3px;
+      padding: 0 3px;
+    }
+
+    /* --- Middle: character bar --- */
+    .char-bar {
+      flex: 0 0 auto;
+      min-width: 0;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 64px;
+      padding: 0 4px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .char-bar::-webkit-scrollbar { height: 4px; }
+    .char-bar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    .char-item {
+      position: relative;
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #333;
+      border: 2px solid transparent;
+      cursor: default;
+      transition: border-color 0.2s;
+    }
+
+    /* Tied (same initiative) — swappable. Dotted white reads as a utility cue,
+       clearly apart from the current-turn gold spotlight below. */
+    .char-item.tied {
+      border-style: dotted;
+      border-color: rgba(255, 255, 255, 0.8);
+      cursor: grab;
+    }
+    .char-item.tied:active { cursor: grabbing; }
+    .char-item.drag-over-tie {
+      border-style: solid;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    /* Current turn — solid gold border + glow. Declared AFTER .tied so it
+       always wins when a character is both tied and active. */
+    .char-item.active {
+      border-style: solid;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.35), 0 0 12px rgba(255, 215, 0, 0.85);
+      z-index: 2;
+    }
+
+    .char-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .char-item .init-chip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--accent);
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 18px;
+      text-align: center;
+      border: 1px solid var(--accent-dim);
+    }
+
+    .char-item .init-chip:hover { background: var(--accent); color: #1a1a2e; }
+
+    .char-item .init-chip[contenteditable="true"] {
+      background: #fff;
+      color: #000;
+    }
+
+    .char-item .name-tag {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: calc(100% - 4px);
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 1px 5px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: bold;
-    }
-
-    .delete-btn {
-      background: none;
-      border: none;
+      text-align: center;
       cursor: pointer;
-      font-size: 10px;
-      color: white;
-      margin-top: 2px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      border: 1px solid var(--accent-dim);
+      border-radius: 4px;
     }
 
-    .delete-btn:hover {
-      color: red;
+    .char-item .name-tag:hover {
+      background: var(--accent);
+      color: #1a1a2e;
+      border-color: var(--accent);
     }
 
-    .skull {
-      font-family: 'Uncial Antiqua', Arial, sans-serif;
-      font-size: 10px;
-      line-height: 1;
+    .char-item .name-tag:empty::before {
+      content: "Enter name...";
+      color: rgba(255, 255, 255, 0.35);
+      font-style: italic;
+      font-weight: 400;
     }
 
-    .mute-btn {
-      white-space: nowrap;
-      padding: 6px 10px;
-      font-size: clamp(10px, 2vw, 13px);
-      background: rgba(68, 68, 68, 0.8);
-      color: white;
-      border: none;
-      border-radius: 6px;
+    .char-item .name-tag:empty {
+      min-width: 70px;
+      min-height: 14px;
+    }
+
+    .char-item .name-tag[contenteditable="true"] {
+      background: rgba(255,255,255,0.95);
+      color: #000;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    .char-item .remove-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--accent);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid var(--accent-dim);
       cursor: pointer;
-      backdrop-filter: blur(4px);
-      transition: background 0.2s;
-      margin: 4px 0;
-      width: 100%;
-      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
     }
 
-    .mute-btn:hover {
-      background: rgba(102, 102, 102, 0.9);
-      transform: scale(1.02);
+    .char-item .remove-btn:hover {
+      background: var(--accent);
+      color: #1a1a2e;
+      border-color: var(--accent);
+      transform: scale(1.15);
     }
 
-    .btn:hover {
-      background: rgba(102, 102, 102, 0.9);
-      transform: scale(1.02);
+    .empty-hint {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      padding: 0 12px;
     }
 
-    .controls {
+    /* --- Right: combat + background --- */
+    .right-group {
+      display: flex;
+      align-items: stretch;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-right: auto;
+    }
+
+    .combat-rows {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+      align-items: stretch;
+    }
+
+    #start-combat {
+      height: auto;
+      min-height: 66px;
+    }
+
+    .combat-grid {
       display: flex;
       flex-direction: column;
-      gap: 0px;
-      margin: 8px 0 12px;
+      gap: 2px;
+    }
+
+    .combat-row {
+      display: flex;
+      gap: 2px;
+    }
+
+    .combat-row .combat-btn {
+      flex: 1;
+    }
+
+    .combat-btn {
+      background: linear-gradient(135deg, #ffd700, #ffa500);
+      color: #1a1a2e;
+      border: none;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      cursor: pointer;
+      height: 32px;
+      min-width: 48px;
+      transition: transform 0.15s;
+      line-height: 1.1;
+      position: relative;
+    }
+    .combat-btn:hover { filter: brightness(1.08); }
+    .combat-btn:active { transform: scale(0.96); }
+
+    .combat-btn[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      right: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(20, 20, 30, 0.95);
+      color: #fff;
+      font-family: 'Alegreya', Georgia, serif;
+      font-size: 0.7rem;
+      font-weight: 400;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--accent-dim);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #legendary-btn { font-size: 0.45rem; letter-spacing: -0.02em; }
+
+    /* Lair action enabled for this encounter */
+    .combat-btn.lair-on {
+      background: linear-gradient(180deg, #e94560 0%, #c0392b 100%);
+      color: #fff;
+    }
+
+    /* Lair action is due right now — pulse the button to remind the DM */
+    .combat-btn.lair-pending {
+      animation: lair-remind 1s ease-in-out infinite;
+    }
+
+    @keyframes lair-remind {
+      0%, 100% { box-shadow: 0 0 8px rgba(233, 69, 96, 0.7); }
+      50% { box-shadow: 0 0 24px 6px rgba(233, 69, 96, 0.95); }
+    }
+
+    .bg-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bg-color-wrap {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
+    .bg-color-wrap .bg-btn {
       width: 100%;
+      height: 100%;
+    }
+
+    .bg-color-wrap input[type="color"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+    }
+
+    .bg-upload-wrap {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
+    .bg-btn {
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      position: relative;
+    }
+    .bg-btn:hover { background: rgba(60, 60, 60, 0.85); border-color: var(--accent); }
+
+    .bg-clear-skull {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      z-index: 2;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+    .bg-clear-skull:hover {
+      background: var(--danger);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .bg-upload-wrap.has-image .bg-clear-skull {
+      display: flex;
+    }
+
+    /* --- Toast --- */
+    .toast {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* --- Persistent lair-action notice ---
+       Shown while a lair action is due; disappears once the DM moves past it.
+       pointer-events:none so it never blocks the combat buttons. */
+    .lair-notice {
+      position: fixed;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      background: linear-gradient(180deg, #e94560 0%, #c0392b 100%);
+      color: #fff;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 5px 18px;
+      border-radius: 6px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
+      z-index: 200;
+      pointer-events: none;
+      animation: lair-notice-pulse 1.2s ease-in-out infinite;
+    }
+    .lair-notice.show { display: block; }
+    @keyframes lair-notice-pulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(233, 69, 96, 0.6); }
+      50% { box-shadow: 0 0 24px rgba(233, 69, 96, 1); }
     }
   </style>
-
-
 </head>
-<body class="theme-default" tabindex="0">
-
-<div class="container">
-  <h2>DM Remote Control</h2>
-  
-  <div class="character-row" id="characterRow">
-    <!-- Character mirror will appear here -->
-  </div>
-  
-  <div class="controls">
-      <button id="nextTurnBtn" class="btn">Next Turn</button>
-      <button id="addCharBtn" class="btn">Add Character</button>
-      <button id="muteBtn" class="mute-btn">Toggle Sound</button>
-      <button class="btn" onclick="window.close()">Close Remote</button>
+<body>
+  <!-- Left: Background controls + add character -->
+  <div class="add-group">
+    <div class="bg-controls">
+      <div class="bg-color-wrap">
+        <label class="bg-btn" title="Background color">
+          &#127912;
+          <input type="color" id="bg-color" value="#1a1a2e">
+        </label>
+      </div>
+      <div class="bg-upload-wrap" id="bg-upload-wrap">
+        <label class="bg-btn" id="bg-upload" title="Background image">
+          &#128444;
+          <input type="file" id="bg-image" accept="image/*" hidden>
+        </label>
+        <button class="bg-clear-skull" id="bg-clear" title="Remove background image" type="button">&#128128;</button>
+      </div>
     </div>
+    <div class="combat-info">
+      <button class="icon-btn add" id="add-btn" title="Add character">+</button>
+      <div class="round-counter" id="round-display" title="Combat round">1</div>
+    </div>
+    <input type="file" id="char-image" accept="image/*" hidden>
+  </div>
 
-    <!-- Add Character Dialog -->
-    <div id="addCharDialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; justify-content: center; align-items: center;">
-      <div style="background: rgba(68,68,68,0.95); padding: 15px; border-radius: 8px; text-align: center; width: 90%; max-width: 300px;">
-        <h3 style="margin-top: 0; color: #ffd700; font-family: 'Uncial Antiqua', cursive; font-size: 16px;">Add Character</h3>
-        <input type="text" id="charName" placeholder="Character Name" style="width: 90%; padding: 8px; margin: 8px 0; border-radius: 4px; border: 1px solid #555; background: rgba(20,20,20,0.8); color: white;">
-        <input type="file" id="charImage" accept="image/*" style="width: 90%; padding: 8px; margin: 8px 0; border-radius: 4px; border: 1px solid #555; background: rgba(20,20,20,0.8); color: white;">
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-          <button onclick="addCharacter()" class="btn" style="flex: 1;">Add</button>
-          <button onclick="document.getElementById('addCharDialog').style.display = 'none'" class="btn" style="flex: 1;">Cancel</button>
+  <!-- Middle: character bar -->
+  <div class="char-bar" id="char-bar">
+    <span class="empty-hint">No characters yet &mdash; add one on the left</span>
+  </div>
+
+  <!-- Right: combat -->
+  <div class="right-group">
+    <div class="combat-rows">
+      <button class="combat-btn" id="start-combat" data-tip="Start Combat — Enter">Start<br>Combat</button>
+      <div class="combat-grid">
+        <div class="combat-row">
+          <button class="combat-btn" id="prev-btn" data-tip="Previous — Left arrow">Prev</button>
+          <button class="combat-btn" id="next-btn" data-tip="Next — Space">Next</button>
+        </div>
+        <div class="combat-row">
+          <button class="combat-btn" id="lair-btn" data-tip="Lair Action — K">Lair</button>
+          <button class="combat-btn" id="legendary-btn" data-tip="Legendary Action — L">Legendary</button>
         </div>
       </div>
     </div>
-</div>
+  </div>
 
-<!-- Hidden button for fullscreen activation from remote -->
-<button id="fullscreenTrigger" style="display:none; position:absolute; top:-1000px; left:-1000px; width:1px; height:1px;"></button>
-
-
-  <script src="js/script.js"></script>
+  <div class="toast" id="toast"></div>
+  <div class="lair-notice" id="lair-notice">&#9876; LAIR ACTION NOW &mdash; click Next</div>
 
   <script>
-    // Resize remote window to standard size
-    function resizeRemoteWindow() {
-      // Standard window size based on fixed character row width
-      const windowWidth = 480; // Width for 10 characters + padding
-      const windowHeight = 350; // Fixed height for all buttons
-      
-      window.resizeTo(windowWidth, windowHeight);
+    'use strict';
+
+    let rfi = null;
+    try {
+      rfi = window.opener && window.opener.RFI;
+    } catch (e) {
+      // Cross-origin restriction (file:// protocol) — opener access blocked
+      console.warn('Cannot access opener window:', e.message);
+    }
+    if (!rfi) {
+      document.body.innerHTML = '<p style="text-align:center;color:#e94560;padding:20px;width:100%;">Main window not found. Open the tracker via http://localhost:8000 (not file://) and reopen the DM Remote.</p>';
+    } else {
+      rfi.onStateChange = refreshAll;
     }
 
-    // Enforce standard window size
-    function enforceWindowSize() {
-      // Standard window size based on fixed character row width
-      const windowWidth = 480; // Width for 10 characters + padding
-      const windowHeight = 350; // Fixed height for all buttons
-      
-      // Check if window has been resized and reset if needed
-      if (window.outerWidth !== windowWidth || window.outerHeight !== windowHeight) {
-        window.resizeTo(windowWidth, windowHeight);
+    const $ = (id) => document.getElementById(id);
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function compressImage(file, maxSize, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            if (width > height && width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            } else if (height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Always size icons to fit exactly 20 characters in the bar,
+    // regardless of how many are actually present. All icons share
+    // the same size; adding characters never resizes existing ones.
+    const MAX_ICONS = 20;
+    const ICON_GAP = 2;
+    function computeIconSize(count, barWidth) {
+      const padding = 8; // 4px each side
+      const usable = Math.max(100, barWidth - padding);
+      const size = Math.floor((usable - (MAX_ICONS - 1) * ICON_GAP) / MAX_ICONS);
+      return Math.max(24, Math.min(56, size));
+    }
+
+    function refreshAll() {
+      if (!rfi) return;
+      const snap = rfi.getSnapshot();
+
+      // Background
+      $('bg-color').value = snap.bgColor;
+      document.body.style.backgroundColor = snap.bgColor;
+      $('bg-upload-wrap').classList.toggle('has-image', !!snap.bgImage);
+
+      // Round counter
+      $('round-display').textContent = snap.round;
+      $('round-display').classList.toggle('double-digit', snap.round >= 10);
+
+      // Lair action sync — `lairPending` is true when the lair action is due now.
+      // The persistent notice stays up until the DM clicks Next to move past it.
+      lairActive = !!snap.lairActionActive;
+      lairPending = !!snap.lairActionPending;
+      updateLairBtn();
+      $('lair-notice').classList.toggle('show', lairPending);
+
+      // Legendary action sync
+      legendaryActive = !!snap.legendaryActive;
+      updateLegendaryBtn();
+
+      // Character bar
+      const bar = $('char-bar');
+      const chars = snap.characters;
+
+      if (chars.length === 0) {
+        bar.innerHTML = '<span class="empty-hint">No characters yet &mdash; add one on the left</span>';
+        bar.style.flex = '1';
+        bar.style.width = 'auto';
+        return;
       }
-    }
 
-    // Add character dialog
-    window.addEventListener('load', function() {
-      setTimeout(resizeRemoteWindow, 100);
-      // Additional resize to ensure all content is loaded
-      setTimeout(resizeRemoteWindow, 500);
-      
-      // Add character button event listener
-      const addCharBtn = document.getElementById('addCharBtn');
-      if (addCharBtn) {
-        addCharBtn.addEventListener('click', function() {
-          document.getElementById('addCharDialog').style.display = 'flex';
+      bar.innerHTML = '';
+      // Two-pass: temporarily expand bar to measure available space,
+      // then shrink to exactly fit 20 icons. Auto margins center both
+      // the bar and the combat buttons equally.
+      const rightGroup = document.querySelector('.right-group');
+      bar.style.flex = '1';
+      bar.style.width = 'auto';
+      bar.style.margin = '0';
+      rightGroup.style.flex = '0 0 auto';
+      rightGroup.style.marginRight = '0';
+      const availBarWidth = bar.clientWidth || 400;
+      rightGroup.style.flex = '';
+      rightGroup.style.marginRight = '';
+      bar.style.margin = '';
+      const iconSize = computeIconSize(chars.length, availBarWidth);
+      const barContentWidth = MAX_ICONS * iconSize + (MAX_ICONS - 1) * ICON_GAP;
+      bar.style.flex = '0 0 auto';
+      bar.style.width = (barContentWidth + 8) + 'px'; // 8px = horizontal padding
+      const tiedIds = getTiedIds(snap);
+
+      chars.forEach((char, i) => {
+        const item = document.createElement('div');
+        item.className = 'char-item';
+        if (i === snap.activeIndex) item.classList.add('active');
+        if (tiedIds.has(char.id)) item.classList.add('tied');
+        item.style.width = iconSize + 'px';
+        item.title = char.name;
+
+        if (char.image) {
+          const img = document.createElement('img');
+          img.src = char.image;
+          item.appendChild(img);
+        } else {
+          item.style.background = '#444';
+        }
+
+        // Initiative chip (click to edit)
+        const initChip = document.createElement('div');
+        initChip.className = 'init-chip';
+        const initVal = (char.initiative !== '' && char.initiative !== null) ? char.initiative : '-';
+        initChip.textContent = initVal;
+        initChip.title = 'Click to edit initiative';
+
+        initChip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (initChip.contentEditable === 'true') return;
+          initChip.textContent = '';
+          initChip.contentEditable = 'true';
+          initChip.focus();
         });
+        initChip.addEventListener('blur', () => {
+          initChip.contentEditable = 'false';
+          const val = initChip.textContent.trim();
+          if (val === '' || isNaN(Number(val))) { initChip.textContent = initVal; return; }
+          rfi.updateCharacter(char.id, { initiative: val });
+        });
+        initChip.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); initChip.blur(); }
+          if (e.key === 'Escape') { initChip.textContent = initVal; initChip.blur(); }
+          e.stopPropagation();
+        });
+
+        // Name tag (click to edit)
+        const nameTag = document.createElement('div');
+        nameTag.className = 'name-tag';
+        nameTag.textContent = char.name;
+        nameTag.title = 'Click to edit name';
+        const origName = char.name;
+        nameTag.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (nameTag.contentEditable === 'true') return;
+          nameTag.textContent = '';
+          nameTag.contentEditable = 'true';
+          nameTag.focus();
+        });
+        nameTag.addEventListener('blur', () => {
+          nameTag.contentEditable = 'false';
+          const val = nameTag.textContent.trim();
+          if (!val) { nameTag.textContent = origName; return; }
+          rfi.updateCharacter(char.id, { name: val });
+        });
+        nameTag.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); nameTag.blur(); }
+          if (e.key === 'Escape') { nameTag.textContent = origName; nameTag.blur(); }
+          e.stopPropagation();
+        });
+
+        // Remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '&#128128;';
+        removeBtn.title = 'Remove';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          rfi.removeCharacter(char.id);
+          toast(`${char.name} removed`);
+        });
+
+        // Drag-to-reorder for tied characters
+        if (tiedIds.has(char.id)) {
+          item.draggable = true;
+          item.addEventListener('dragstart', (e) => {
+            dragSourceId = char.id;
+            item.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', char.id); } catch (err) {}
+          });
+          item.addEventListener('dragend', () => {
+            item.style.opacity = '';
+            bar.querySelectorAll('.char-item').forEach(c => c.classList.remove('drag-over-tie'));
+          });
+          item.addEventListener('dragover', (e) => {
+            if (!dragSourceId || dragSourceId === char.id) return;
+            const source = chars.find(c => c.id === dragSourceId);
+            if (!source || String(source.initiative ?? '') !== String(char.initiative ?? '')) return;
+            e.preventDefault();
+            item.classList.add('drag-over-tie');
+          });
+          item.addEventListener('dragleave', () => {
+            item.classList.remove('drag-over-tie');
+          });
+          item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            item.classList.remove('drag-over-tie');
+            if (!dragSourceId || dragSourceId === char.id) return;
+            const source = chars.find(c => c.id === dragSourceId);
+            if (!source || String(source.initiative ?? '') !== String(char.initiative ?? '')) return;
+            // Build the reordered initiative group and send to the parent.
+            const initStr = (char.initiative === '' || char.initiative === null) ? 'null' : String(char.initiative);
+            const groupIds = chars.filter(c => {
+              const ck = (c.initiative === '' || c.initiative === null) ? 'null' : String(c.initiative);
+              return ck === initStr;
+            }).map(c => c.id);
+            const fromIdx = groupIds.indexOf(dragSourceId);
+            const toIdx = groupIds.indexOf(char.id);
+            if (fromIdx === -1 || toIdx === -1) return;
+            groupIds.splice(fromIdx, 1);
+            groupIds.splice(toIdx, 0, dragSourceId);
+            const draftKey = (char.initiative === '' || char.initiative === null) ? '—' : String(char.initiative);
+            rfi.applyTiebreakOrder({ [draftKey]: groupIds });
+            dragSourceId = null;
+          });
+        }
+
+        item.appendChild(initChip);
+        item.appendChild(nameTag);
+        item.appendChild(removeBtn);
+        bar.appendChild(item);
+      });
+    }
+
+    /* ====================================================================
+       Tiebreak Resolution — tied characters are draggable directly on the
+       character bar. No separate popup or button needed.
+       ==================================================================== */
+
+    // Returns a Set of character IDs that share an initiative with at least
+    // one other character (i.e., are tied).
+    function getTiedIds(snap) {
+      const counts = {};
+      for (const c of snap.characters) {
+        const k = (c.initiative === '' || c.initiative === null) ? 'null' : String(c.initiative);
+        counts[k] = (counts[k] || 0) + 1;
       }
-      
-      // Next turn button event listener
-      const nextTurnBtn = document.getElementById('nextTurnBtn');
-      if (nextTurnBtn) {
-        nextTurnBtn.addEventListener('click', nextTurn);
+      const tied = new Set();
+      for (const c of snap.characters) {
+        const k = (c.initiative === '' || c.initiative === null) ? 'null' : String(c.initiative);
+        if (counts[k] >= 2) tied.add(c.id);
       }
-      
-      // Toggle sound button event listener
-      const muteBtn = document.getElementById('muteBtn');
-      if (muteBtn) {
-        muteBtn.addEventListener('click', toggleMute);
+      return tied;
+    }
+
+    // Drag state for the character bar.
+    let dragSourceId = null;
+
+    // --- Add character ---
+    $('add-btn').addEventListener('click', () => {
+      $('char-image').click();
+    });
+
+    $('char-image').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const image = await compressImage(file, 1200, 0.90);
+        const added = rfi.addCharacter('', '', image);
+        if (added) toast('Character added');
+      } catch { toast('Failed to load image'); }
+      e.target.value = '';
+    });
+
+    // --- Background ---
+    $('bg-color').addEventListener('input', (e) => rfi.setBgColor(e.target.value));
+    $('bg-color').addEventListener('change', (e) => e.target.blur());
+
+    $('bg-image').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const img = await compressImage(file, 1920, 0.85);
+        rfi.setBgImage(img);
+        toast('Background set');
+      } catch { toast('Failed to load image'); }
+    });
+
+    $('bg-clear').addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      rfi.clearBgImage();
+      toast('Background removed');
+    });
+
+    // --- Combat ---
+    $('start-combat').addEventListener('click', () => {
+      rfi.startCombat();
+      toast('New combat — Round 1');
+    });
+
+    $('next-btn').addEventListener('click', () => {
+      rfi.next();
+    });
+
+    $('prev-btn').addEventListener('click', () => {
+      rfi.prev();
+    });
+
+    let lairActive = false;
+    let lairPending = false;      // lair action is due right now
+
+    function updateLairBtn() {
+      const btn = $('lair-btn');
+      btn.classList.toggle('lair-on', lairActive);
+      btn.classList.toggle('lair-pending', lairPending);
+    }
+
+    $('lair-btn').addEventListener('click', () => {
+      lairActive = !lairActive;
+      rfi.setLairAction(lairActive);
+      updateLairBtn();
+    });
+
+    let legendaryActive = false;
+
+    function updateLegendaryBtn() {
+      const btn = $('legendary-btn');
+      if (legendaryActive) {
+        btn.style.background = 'linear-gradient(180deg, #e94560 0%, #c0392b 100%)';
+        btn.style.color = '#fff';
+        btn.style.boxShadow = '0 0 12px rgba(233, 69, 96, 0.6)';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.boxShadow = '';
+      }
+    }
+
+    $('legendary-btn').addEventListener('click', () => {
+      legendaryActive = !legendaryActive;
+      rfi.setLegendaryAction(legendaryActive);
+      updateLegendaryBtn();
+    });
+
+    // --- Keyboard shortcuts ---
+    // Space = Next, Left = Previous, Enter = Start Combat, K = Lair,
+    // L = Legendary, F = Fullscreen (controls the projected tracker page)
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' ||
+                t.isContentEditable)) return;
+      // Allow shortcuts on color/file inputs — just blur them first
+      if (t && t.tagName === 'INPUT' &&
+          t.type !== 'color' && t.type !== 'file') return;
+
+      const key = e.key;
+      let btnId = null;
+      if (key === ' ') btnId = 'next-btn';
+      else if (key === 'ArrowLeft') btnId = 'prev-btn';
+      else if (key === 'Enter') btnId = 'start-combat';
+      else if (key === 'k' || key === 'K') btnId = 'lair-btn';
+      else if (key === 'l' || key === 'L') btnId = 'legendary-btn';
+
+      if (btnId) {
+        e.preventDefault();
+        const btn = $(btnId);
+        if (btn && !btn.disabled) btn.click();
+        return;
+      }
+
+      if (key === 'f' || key === 'F') {
+        e.preventDefault();
+        try {
+          rfi.toggleFullscreen()
+            .then((entered) => {
+              toast(entered ? 'Tracker fullscreen' : 'Exited fullscreen');
+            })
+            .catch(() => {
+              toast('Blocked — press F on the tracker window instead');
+            });
+        } catch (err) {
+          toast('Blocked — press F on the tracker window instead');
+        }
       }
     });
 
-    // Resize when characters change
-    window.addEventListener('storage', function(event) {
-      if (event.key === 'initiativeTrackerSave') {
-        setTimeout(resizeRemoteWindow, 100);
-      }
-    });
-
-    // Immediately enforce window size when resize is attempted
-    window.addEventListener('resize', function() {
-      enforceWindowSize();
-    });
-
-    // Periodically enforce window size as backup
-    setInterval(enforceWindowSize, 200);
+    // --- Init ---
+    if (rfi) refreshAll();
+    window.addEventListener('focus', () => { if (rfi) refreshAll(); });
+    window.addEventListener('resize', () => { if (rfi) refreshAll(); });
   </script>
-
 </body>
 </html>
